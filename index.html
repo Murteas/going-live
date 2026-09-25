@@ -139,7 +139,13 @@
     transform: translateY(14px) scale(.96);
   }
   .lyric.in { animation: popin .42s cubic-bezier(.2,.9,.3,1.2) forwards; }
-  .lyric.chorus { font-size: clamp(1.5rem, 6.4vw, 2.5rem); font-weight: 900; background: linear-gradient(100deg, var(--stage-gold), #FFF3C4 45%, var(--stage-hot)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .fx { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; }
+  .lyric .w { display: inline-block; color: var(--stage-ink); opacity: .38; transition: opacity .12s ease-out, transform .12s ease-out; }
+  .lyric .w.on { opacity: 1; transform: translateY(-2px); }
+  .lyric.count .w.on { color: var(--stage-gold); }
+  .lyric.chorus { font-size: clamp(1.5rem, 6.4vw, 2.5rem); font-weight: 900; }
+  .lyric.chorus .w { color: var(--stage-ink); opacity: .32; }
+  .lyric.chorus .w.on { opacity: 1; background: linear-gradient(100deg, var(--stage-gold), #FFF3C4 45%, var(--stage-hot)); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .lyric.title { font-size: clamp(2.2rem, 10vw, 4rem); font-weight: 900; letter-spacing: -.02em; color: var(--stage-ink); }
   .lyric.title small { display: block; font-family: "Manrope", sans-serif; font-weight: 600; font-size: .95rem; letter-spacing: 0; margin-top: 12px; color: var(--stage-gold); }
   @keyframes popin { to { opacity: 1; transform: none; } }
@@ -267,6 +273,7 @@
     <div class="stage" id="stage" aria-label="One-minute lyric video: Going Live">
       <div class="glow"></div>
       <div class="grid"></div>
+      <canvas class="fx" id="fx" aria-hidden="true"></canvas>
       <div class="lyric" id="lyric" aria-live="polite"></div>
       <button class="start" id="start" type="button" aria-label="Play the one-minute anthem">
         <span class="btn"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>Play the anthem</span>
@@ -361,6 +368,11 @@
         <li>In college, get an internship the summer after your first or second year. Mine led to my first job.</li>
       </ol>
     </div>
+    <div class="path mine">
+      <h3>One I built for fun</h3>
+      <span class="meta">Christmas MasterMind, made for our family party.</span>
+      <p>Engineers don't only build at work. This is a code-breaking game I wrote so my family could play it on their phones at our Christmas party. Same ingredients as this page: a web page, some code, a free GitHub link. <a href="https://murteas.github.io/XmasMM/">Play it</a>, then think about what your family would play.</p>
+    </div>
   </section>
 
   <section id="try">
@@ -429,31 +441,32 @@ if (age = 18) {
 
 <script>
 (function () {
-  // ---------- The 30-second lyric video ----------
-  // going-live.mp3 is published next to this page. Cue times come from a word-level transcription of the track.
-  // If the audio cannot load, the page falls back to a synthesized beat and says so under the video.
+  // ---------- The one-minute lyric video ----------
+  // going-live.mp3 is published next to this page. Every word carries the time it is sung, taken from a
+  // word-level transcription of the track. If the audio cannot load, the page falls back to a synthesized
+  // beat and says so under the video.
   var AUDIO_SRC = "going-live.mp3";
   var BPM = 128;
   var DURATION = 68.72;
   var CUES = [
-    { t: 0.65,  text: "Blank screen, blinking line, the whole world in my hands" },
-    { t: 4.95,  text: "Every bug's a door, every fix a plan" },
-    { t: 8.55,  text: "Think it, type it, break it, build it back tonight" },
-    { t: 11.45, text: "Three, two, one, hit run" },
-    { t: 16.4,  text: "Nobody sees the hours, they only see the light" },
-    { t: 20.2,  text: "But I know what I made, and I made it right" },
-    { t: 26.6,  text: "Watch it come alive, alive", chorus: true },
-    { t: 30.3,  text: "Something out of nothing and I built it with my mind", chorus: true },
-    { t: 33.85, text: "Ship it to the sky, tonight", chorus: true },
-    { t: 37.65, text: "Every line I write can light up someone's life", chorus: true },
-    { t: 41.6,  text: "We're gonna run it, run it, run it, we're going live", chorus: true },
-    { t: 45.1,  text: "We're gonna run it, run it, run it, we're going live", chorus: true },
-    { t: 48.05, text: "Watch it come alive, alive", chorus: true },
-    { t: 52.05, text: "Something out of nothing and I built it with my mind", chorus: true },
-    { t: 55.65, text: "Ship it to the sky, tonight", chorus: true },
-    { t: 59.55, text: "Every line I write can light up someone's life", chorus: true },
-    { t: 63.5,  text: "We're gonna run it, run it, run it, we're going live", chorus: true },
-    { t: 66.4,  title: true, text: "GOING LIVE", sub: "Software engineering. Your turn." }
+    { t: 0.65, kind: "verse", words: [["Blank", 0.8], ["screen,", 1.44], ["blinking", 1.9], ["line,", 2.3], ["the", 2.9], ["whole", 3.3], ["world", 3.68], ["in", 4.08], ["my", 4.28], ["hands", 4.48]] },
+    { t: 4.95, kind: "verse", words: [["Every", 5.1], ["bug's", 5.36], ["a", 6.02], ["door,", 6.1], ["every", 6.88], ["fix", 7.22], ["a", 7.56], ["plan", 7.96]] },
+    { t: 8.53, kind: "verse", words: [["Think", 8.68], ["it,", 8.99], ["type", 9.19], ["it,", 9.45], ["break", 9.66], ["it,", 9.96], ["build", 10.17], ["it", 10.48], ["back", 10.63], ["tonight", 10.89]] },
+    { t: 12.31, kind: "countdown", words: [["Three,", 12.46], ["two,", 13.58], ["one,", 14.5], ["hit", 15.26], ["run", 15.52]] },
+    { t: 16.41, kind: "pre", words: [["Nobody", 16.56], ["sees", 17.12], ["the", 17.44], ["hours,", 17.72], ["they", 18.34], ["only", 18.62], ["see", 19.0], ["the", 19.32], ["light", 19.6]] },
+    { t: 20.19, kind: "pre", words: [["But", 20.34], ["I", 20.58], ["know", 20.8], ["what", 20.94], ["I", 21.28], ["made,", 21.38], ["and", 21.8], ["I", 22.18], ["made", 22.4], ["it", 23.14], ["right", 23.8]] },
+    { t: 26.57, kind: "chorus", words: [["Watch", 26.72], ["it", 27.2], ["come", 27.4], ["alive,", 27.68], ["alive", 29.7]] },
+    { t: 30.29, kind: "chorus", words: [["Something", 30.44], ["out", 30.92], ["of", 31.36], ["nothing", 31.52], ["and", 31.8], ["I", 32.24], ["built", 32.46], ["it", 32.64], ["with", 32.88], ["my", 33.08], ["mind", 33.3]] },
+    { t: 33.83, kind: "chorus", words: [["Ship", 33.98], ["it", 34.38], ["to", 34.68], ["the", 34.94], ["sky,", 35.14], ["tonight", 36.56]] },
+    { t: 37.63, kind: "chorus", words: [["Every", 37.78], ["line", 38.26], ["I", 38.64], ["write", 38.8], ["can", 39.08], ["light", 39.32], ["up", 39.54], ["someone's", 39.7], ["life", 40.58]] },
+    { t: 41.59, kind: "run", words: [["We're", 41.74], ["gonna", 42.08], ["run", 42.32], ["it,", 42.66], ["run", 43.0], ["it,", 43.1], ["run", 43.4], ["it,", 43.56], ["we're", 43.76], ["going", 43.92], ["live", 44.04]] },
+    { t: 45.07, kind: "run", words: [["We're", 45.22], ["gonna", 45.7], ["run", 45.98], ["it,", 46.3], ["run", 46.62], ["it,", 46.74], ["run", 47.06], ["it,", 47.24], ["we're", 47.4], ["going", 47.58], ["live", 47.74]] },
+    { t: 48.03, kind: "chorus", words: [["Watch", 48.18], ["it", 49.08], ["come", 49.36], ["alive,", 49.62], ["alive", 51.48]] },
+    { t: 52.05, kind: "chorus", words: [["Something", 52.2], ["out", 52.62], ["of", 53.3], ["nothing", 53.42], ["and", 53.76], ["I", 54.14], ["built", 54.32], ["it", 54.56], ["with", 54.8], ["my", 54.98], ["mind", 55.2]] },
+    { t: 55.63, kind: "chorus", words: [["Ship", 55.78], ["it", 56.2], ["to", 56.6], ["the", 56.84], ["sky,", 57.02], ["tonight", 58.32]] },
+    { t: 59.55, kind: "chorus", words: [["Every", 59.7], ["line", 60.14], ["I", 60.52], ["write", 60.7], ["can", 60.98], ["light", 61.18], ["up", 61.42], ["someone's", 61.6], ["life", 62.38]] },
+    { t: 63.51, kind: "run", words: [["We're", 63.66], ["gonna", 64.0], ["run", 64.18], ["it,", 64.52], ["run", 64.84], ["it,", 64.96], ["run", 65.28], ["it,", 65.4], ["we're", 65.6], ["going", 65.72], ["live", 65.9]] },
+    { t: 66.4, kind: "title", words: [] }
   ];
 
   var stage = document.getElementById("stage");
@@ -500,6 +513,131 @@ if (age = 18) {
     return Math.max(0, 1 - phase * 2.5);
   }
 
+  // ---------- Visuals: code rain, countdown numerals, bursts, rings, the deploy bar ----------
+  var fx = document.getElementById("fx");
+  var g2 = fx.getContext("2d");
+  var W = 0, H = 0, DPR = 1;
+  var GLYPHS = "{}();=<>/*+-_01[]&|!#$".split("");
+  var PCOLORS = ["#FFC24B", "#FF3D8A", "#FFF3C4", "#5FE6FF"];
+  var columns = [], particles = [], flashes = [], rings = [];
+  var scene = "idle", lastT = 0, deployDone = false, idleTimer = 0;
+  var wordSpans = [], wordIndex = 0;
+
+  function sizeFx() {
+    DPR = Math.min(2, window.devicePixelRatio || 1);
+    W = stage.clientWidth; H = stage.clientHeight;
+    fx.width = Math.round(W * DPR); fx.height = Math.round(H * DPR);
+    g2.setTransform(DPR, 0, 0, DPR, 0, 0);
+    columns = [];
+    var n = Math.ceil(W / 22);
+    for (var i = 0; i < n; i++) columns.push({ x: i * 22 + 8, y: Math.random() * H, v: 40 + Math.random() * 90, len: 6 + Math.floor(Math.random() * 10), seed: Math.floor(Math.random() * 1000) });
+  }
+  function glyphAt(n) { var L = GLYPHS.length; return GLYPHS[((n % L) + L) % L]; }
+  function drawRain(dt, alpha, speed) {
+    g2.font = "13px 'JetBrains Mono', Consolas, monospace"; g2.textAlign = "center"; g2.textBaseline = "alphabetic";
+    for (var i = 0; i < columns.length; i++) {
+      var c = columns[i];
+      c.y += c.v * speed * dt;
+      if (c.y - c.len * 16 > H) { c.y = -Math.random() * H * 0.5; c.v = 40 + Math.random() * 90; }
+      var row = Math.floor(c.y / 16);
+      for (var k = 0; k < c.len; k++) {
+        var y = c.y - k * 16; if (y < -16 || y > H + 16) continue;
+        var a = alpha * (1 - k / c.len);
+        g2.fillStyle = k === 0 ? "rgba(255,249,236," + (a * 0.9).toFixed(3) + ")" : "rgba(160,150,230," + (a * 0.55).toFixed(3) + ")";
+        g2.fillText(glyphAt(c.seed + k * 7 + row), c.x, y);
+      }
+    }
+  }
+  function burst(x, y, n, spread, power) {
+    for (var i = 0; i < n; i++) {
+      var a = Math.random() * Math.PI * 2, s = (0.4 + Math.random()) * power;
+      particles.push({ x: x, y: y, vx: Math.cos(a) * s * spread, vy: Math.sin(a) * s - power * 0.4, g: 160, life: 1, decay: 0.5 + Math.random() * 0.7, r: 2 + Math.random() * 3, c: PCOLORS[i % PCOLORS.length], shape: Math.random() < 0.3 ? 1 : 0 });
+    }
+    if (particles.length > 520) particles.splice(0, particles.length - 520);
+  }
+  function ember() {
+    particles.push({ x: Math.random() * W, y: H + 6, vx: (Math.random() - 0.5) * 16, vy: -(30 + Math.random() * 50), g: 0, life: 1, decay: 0.22 + Math.random() * 0.25, r: 1 + Math.random() * 1.6, c: Math.random() < 0.7 ? "#FFC24B" : "#FF3D8A", shape: 0 });
+  }
+  function drawParticles(dt) {
+    for (var i = particles.length - 1; i >= 0; i--) {
+      var p = particles[i];
+      p.life -= p.decay * dt; if (p.life <= 0) { particles.splice(i, 1); continue; }
+      p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+      g2.globalAlpha = Math.max(0, Math.min(1, p.life));
+      g2.fillStyle = p.c;
+      if (p.shape) { g2.fillRect(p.x - p.r, p.y - p.r * 0.6, p.r * 2, p.r * 1.2); }
+      else { g2.beginPath(); g2.arc(p.x, p.y, p.r, 0, Math.PI * 2); g2.fill(); }
+    }
+    g2.globalAlpha = 1;
+  }
+  // Flashes and rings are timed against the song clock, not frame count, so a throttled tab cannot leave one stuck on screen.
+  function flash(text, t) { flashes.push({ text: text, t0: t }); }
+  function drawFlashes(t) {
+    for (var i = flashes.length - 1; i >= 0; i--) {
+      var f = flashes[i]; var k = (t - f.t0) / 0.9; if (k >= 1 || k < 0) { flashes.splice(i, 1); continue; }
+      g2.globalAlpha = (1 - k) * 0.5; g2.fillStyle = "#FFC24B";
+      g2.font = "900 " + Math.round(Math.min(W, H) * 0.7 * (1 + k * 0.5)) + "px Unbounded, Manrope, sans-serif";
+      g2.textAlign = "center"; g2.textBaseline = "middle";
+      g2.fillText(f.text, W / 2, H * 0.44);
+    }
+    g2.globalAlpha = 1; g2.textBaseline = "alphabetic";
+  }
+  function ring(color, t) { rings.push({ t0: t, c: color }); }
+  function drawRings(t) {
+    for (var i = rings.length - 1; i >= 0; i--) {
+      var r = rings[i]; var k = (t - r.t0) / 0.8; if (k >= 1 || k < 0) { rings.splice(i, 1); continue; }
+      g2.globalAlpha = (1 - k) * 0.7; g2.strokeStyle = r.c; g2.lineWidth = 3 * (1 - k) + 1;
+      g2.beginPath(); g2.arc(W / 2, H / 2, 10 + k * Math.max(W, H) * 0.7, 0, Math.PI * 2); g2.stroke();
+    }
+    g2.globalAlpha = 1;
+  }
+  function roundRect(x, y, w, h, r) {
+    g2.beginPath(); g2.moveTo(x + r, y); g2.arcTo(x + w, y, x + w, y + h, r); g2.arcTo(x + w, y + h, x, y + h, r);
+    g2.arcTo(x, y + h, x, y, r); g2.arcTo(x, y, x + w, y, r); g2.closePath();
+  }
+  function drawDeploy(t) {
+    var k = Math.min(1, Math.max(0, (t - 66.4) / 1.5));
+    var bw = Math.min(W * 0.7, 420), bh = 10, x = (W - bw) / 2, y = H * 0.7;
+    g2.fillStyle = "rgba(255,249,236,.18)"; roundRect(x, y, bw, bh, 5); g2.fill();
+    if (k > 0) { g2.fillStyle = k < 1 ? "#FFC24B" : "#5FE6FF"; roundRect(x, y, Math.max(bh, bw * k), bh, 5); g2.fill(); }
+    g2.fillStyle = "rgba(255,249,236,.85)"; g2.font = "600 13px Manrope, sans-serif"; g2.textAlign = "center"; g2.textBaseline = "alphabetic";
+    g2.fillText(k < 1 ? "deploying " + Math.round(k * 100) + "%" : "deployed. 100%", W / 2, y + 30);
+    if (k >= 1 && !deployDone) { deployDone = true; burst(W / 2, H * 0.45, 170, 1.3, 260); ring("#5FE6FF", t); }
+  }
+  function renderFx(t, beat) {
+    if (reduced) return;
+    var dt = Math.min(0.05, Math.max(0, t - lastT)); lastT = t;
+    g2.clearRect(0, 0, W, H);
+    if (scene === "idle") drawRain(dt, 0.35, 0.8);
+    else if (scene === "verse") drawRain(dt, 0.7 + beat * 0.3, 1);
+    else if (scene === "countdown") drawRain(dt, 0.85, 1.8 + beat);
+    else if (scene === "pre") { drawRain(dt, 0.25, 0.6); if (Math.random() < 0.5) ember(); }
+    else if (scene === "chorus" || scene === "run") { if (Math.random() < 0.8) ember(); if (beat > 0.6 && Math.random() < 0.3) burst(Math.random() * W, Math.random() * H * 0.6, 4, 1, 60); }
+    else if (scene === "title") { drawDeploy(t); if (Math.random() < 0.5) ember(); }
+    drawRings(t); drawParticles(dt); drawFlashes(t);
+  }
+  function wordFx(c, i, w, t) {
+    if (reduced) return;
+    var clean = w.replace(/[^a-z']/gi, "").toLowerCase();
+    if (c.kind === "countdown") {
+      if (clean === "three") flash("3", t);
+      else if (clean === "two") flash("2", t);
+      else if (clean === "one") flash("1", t);
+      else if (clean === "run") { ring("#FFC24B", t); burst(W / 2, H / 2, 120, 1.3, 240); }
+    } else if (c.kind === "run") {
+      if (clean === "run") ring("#FF3D8A", t);
+      if (clean === "live") { burst(W / 2, H * 0.5, 140, 1.4, 260); ring("#5FE6FF", t); }
+    } else if (c.kind === "chorus") {
+      if (i === 0) burst(W / 2, H * 0.5, 90, 1.2, 220);
+      else if (Math.random() < 0.6) burst(W * (0.2 + Math.random() * 0.6), H * (0.25 + Math.random() * 0.5), 10, 1, 90);
+    } else if (c.kind === "pre" && i === 0) { ring("rgba(160,150,230,1)", t); }
+  }
+  function idle() {
+    if (running) return;
+    renderFx(performance.now() / 1000, 0);
+    idleTimer = setTimeout(function () { requestAnimationFrame(idle); }, 40);
+  }
+
   function beatTrack(context) {
     // Kick on every beat, hat on the off-beats, a rising pad through the chorus. Placeholder until the real song arrives.
     var spb = 60 / BPM;
@@ -525,26 +663,43 @@ if (age = 18) {
   function showCue(c) {
     lyric.className = "lyric";
     void lyric.offsetWidth; // restart the pop-in
-    if (c.title) {
-      lyric.innerHTML = "";
-      lyric.appendChild(document.createTextNode(c.text));
-      var s = document.createElement("small"); s.textContent = c.sub; lyric.appendChild(s);
+    lyric.innerHTML = "";
+    wordSpans = []; wordIndex = 0;
+    scene = c.kind;
+    stage.classList.toggle("chorus", c.kind === "chorus" || c.kind === "run");
+    if (c.kind === "title") {
+      lyric.appendChild(document.createTextNode("GOING LIVE"));
+      var s = document.createElement("small"); s.textContent = "Software engineering. Your turn."; lyric.appendChild(s);
       lyric.classList.add("title", "in");
       stage.classList.add("live");
-    } else {
-      lyric.textContent = c.text;
-      lyric.classList.add("in");
-      if (c.chorus) { lyric.classList.add("chorus"); stage.classList.add("chorus"); }
+      deployDone = false;
+      return;
     }
+    c.words.forEach(function (w, i) {
+      var span = document.createElement("span"); span.className = "w"; span.textContent = w[0];
+      lyric.appendChild(span); wordSpans.push(span);
+      if (i < c.words.length - 1) lyric.appendChild(document.createTextNode(" "));
+    });
+    lyric.classList.add("in");
+    if (c.kind === "chorus" || c.kind === "run") lyric.classList.add("chorus");
+    if (c.kind === "countdown") lyric.classList.add("count");
   }
 
   function frame() {
     var t = now();
     var next = cueIndex + 1;
     while (next < CUES.length && CUES[next].t <= t) { cueIndex = next; showCue(CUES[cueIndex]); next++; }
-    if (!reduced) {
-      stage.style.setProperty("--beat", String(beatLevel(t)));
+    var c = CUES[cueIndex];
+    if (c) {
+      while (wordIndex < c.words.length && c.words[wordIndex][1] <= t) {
+        if (wordSpans[wordIndex]) wordSpans[wordIndex].classList.add("on");
+        wordFx(c, wordIndex, c.words[wordIndex][0], t);
+        wordIndex++;
+      }
     }
+    var beat = reduced ? 0 : beatLevel(t);
+    if (!reduced) stage.style.setProperty("--beat", String(beat));
+    renderFx(t, beat);
     progress.style.width = Math.min(100, t / DURATION * 100) + "%";
     if (t >= DURATION) { finish(); return; }
     raf = requestAnimationFrame(frame);
@@ -554,9 +709,13 @@ if (age = 18) {
     running = false; paused = false;
     cancelAnimationFrame(raf);
     if (audio) { audio.pause(); }
+    // If the tab was throttled and frames fell behind the song, still land on the title card.
+    if (cueIndex < CUES.length - 1) { cueIndex = CUES.length - 1; showCue(CUES[cueIndex]); }
     replay.hidden = false;
     pauseBtn.hidden = true; hint.hidden = true;
     stage.classList.remove("chorus", "paused");
+    scene = "idle"; lastT = performance.now() / 1000;
+    if (!reduced) idle();
   }
 
   function setPausedUI(isPaused) {
@@ -589,7 +748,9 @@ if (age = 18) {
     replay.hidden = true;
     pauseBtn.hidden = false; hint.hidden = false;
     setPausedUI(false);
-    lyric.className = "lyric";
+    lyric.className = "lyric"; lyric.innerHTML = "";
+    clearTimeout(idleTimer);
+    particles = []; flashes = []; rings = []; scene = "verse"; lastT = 0;
     if (AUDIO_SRC) {
       if (!audio) {
         audio = new Audio(AUDIO_SRC); audio.preload = "auto"; audio.crossOrigin = "anonymous";
@@ -637,6 +798,9 @@ if (age = 18) {
   document.addEventListener("visibilitychange", function () {
     if (document.hidden && running && !paused) togglePause();
   });
+  window.addEventListener("resize", sizeFx);
+  sizeFx();
+  if (reduced) { fx.hidden = true; } else { idle(); }
 
   // ---------- Live editor ----------
   var code = document.getElementById("code");
