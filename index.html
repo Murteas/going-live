@@ -1,0 +1,638 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="A one-minute original anthem and a one-page guide to a software engineering career for youth ages 11 to 18.">
+<meta name="color-scheme" content="light dark">
+<style>
+  :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+</style>
+<title>Going Live</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Manrope:wght@400;500;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --bg: #F4F3FB;
+    --card: #FFFFFF;
+    --ink: #1B1740;
+    --muted: #5D5A7A;
+    --line: #DAD8EA;
+    --gold: #C99700;
+    --gold-soft: #FFF1C2;
+    --hot: #D81E68;
+    --hot-soft: #FFE1EC;
+    --code-bg: #1B1740;
+    --code-ink: #F1EEFF;
+    --focus: #2B5BFF;
+    --stage: #0B0820;
+    --stage-gold: #FFC24B;
+    --stage-hot: #FF3D8A;
+    --stage-cyan: #5FE6FF;
+    --stage-ink: #FFF9EC;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #15112B;
+      --card: #1F1A3D;
+      --ink: #F1EEFF;
+      --muted: #A8A3C7;
+      --line: #342D5E;
+      --gold: #FFC24B;
+      --gold-soft: #3A3010;
+      --hot: #FF5C99;
+      --hot-soft: #45183A;
+      --code-bg: #0B0820;
+      --code-ink: #F1EEFF;
+      --focus: #8FB0FF;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #15112B;
+    --card: #1F1A3D;
+    --ink: #F1EEFF;
+    --muted: #A8A3C7;
+    --line: #342D5E;
+    --gold: #FFC24B;
+    --gold-soft: #3A3010;
+    --hot: #FF5C99;
+    --hot-soft: #45183A;
+    --code-bg: #0B0820;
+    --code-ink: #F1EEFF;
+    --focus: #8FB0FF;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Manrope", "Segoe UI", system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+    padding-inline: 16px;
+    padding-block: 0 64px;
+  }
+  main { max-width: 640px; margin: 0 auto; display: grid; gap: 56px; }
+  h1, h2, h3 { font-family: "Unbounded", "Manrope", sans-serif; text-wrap: balance; line-height: 1.15; margin: 0; }
+  h2 { font-size: 1.45rem; font-weight: 700; }
+  h3 { font-size: 1.05rem; font-weight: 700; }
+  p { margin: 0; max-width: 62ch; }
+  a { color: var(--ink); text-decoration-color: var(--gold); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  a:hover { text-decoration-color: var(--hot); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+  section { display: grid; gap: 18px; }
+  .lede { font-size: 1.1rem; font-weight: 500; color: var(--muted); }
+  .kicker { font-family: "Unbounded", sans-serif; font-weight: 500; font-size: .8rem; color: var(--hot); }
+
+  /* ---------- Stage (the lyric video) ---------- */
+  .top { display: grid; gap: 14px; padding-top: 20px; }
+  .stage {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    max-width: 100%;
+    border-radius: 22px;
+    overflow: hidden;
+    background: var(--stage);
+    color: var(--stage-ink);
+    display: grid;
+    place-items: center;
+    isolation: isolate;
+    --beat: 0;
+  }
+  @media (min-width: 700px) { .stage { aspect-ratio: 16 / 10; } }
+  .glow {
+    position: absolute; inset: -20%;
+    background:
+      radial-gradient(circle at 25% 25%, var(--stage-hot) 0, transparent 38%),
+      radial-gradient(circle at 78% 70%, var(--stage-gold) 0, transparent 40%),
+      radial-gradient(circle at 60% 20%, var(--stage-cyan) 0, transparent 30%);
+    opacity: .28;
+    filter: blur(30px);
+    transform: scale(calc(1 + var(--beat) * .08));
+    transition: opacity .6s;
+  }
+  .stage.chorus .glow { opacity: .55; }
+  .stage.live .glow { opacity: .8; }
+  .grid {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: radial-gradient(circle at 50% 60%, #000 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(circle at 50% 60%, #000 30%, transparent 80%);
+  }
+  .lyric {
+    position: relative;
+    z-index: 2;
+    padding: 24px;
+    text-align: center;
+    font-family: "Unbounded", sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.25rem, 5.2vw, 2rem);
+    line-height: 1.2;
+    text-wrap: balance;
+    max-width: 92%;
+    opacity: 0;
+    transform: translateY(14px) scale(.96);
+  }
+  .lyric.in { animation: popin .42s cubic-bezier(.2,.9,.3,1.2) forwards; }
+  .lyric.chorus { font-size: clamp(1.5rem, 6.4vw, 2.5rem); font-weight: 900; background: linear-gradient(100deg, var(--stage-gold), #FFF3C4 45%, var(--stage-hot)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lyric.title { font-size: clamp(2.2rem, 10vw, 4rem); font-weight: 900; letter-spacing: -.02em; color: var(--stage-ink); }
+  .lyric.title small { display: block; font-family: "Manrope", sans-serif; font-weight: 600; font-size: .95rem; letter-spacing: 0; margin-top: 12px; color: var(--stage-gold); }
+  @keyframes popin { to { opacity: 1; transform: none; } }
+  .start {
+    position: absolute; inset: 0; z-index: 3;
+    display: grid; place-items: center; align-content: center; gap: 12px;
+    background: transparent; border: 0; cursor: pointer; color: inherit; font: inherit;
+  }
+  .start .btn {
+    display: inline-grid; grid-auto-flow: column; align-items: center; gap: 12px;
+    padding: 14px 22px 14px 16px; border-radius: 999px;
+    background: var(--stage-ink); color: var(--stage);
+    font-family: "Unbounded", sans-serif; font-weight: 700; font-size: 1rem;
+    box-shadow: 0 10px 40px rgba(255, 61, 138, .35);
+  }
+  .start .btn svg { width: 22px; height: 22px; }
+  .start .note { font-size: .9rem; color: var(--stage-ink); opacity: .8; }
+  .stage.playing .start { display: none; }
+  .bar { position: absolute; left: 16px; right: 16px; bottom: 14px; height: 4px; background: rgba(255,255,255,.18); border-radius: 2px; overflow: hidden; z-index: 2; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--stage-gold); }
+  .caption { display: flex; justify-content: space-between; gap: 12px; font-size: .9rem; color: var(--muted); flex-wrap: wrap; }
+  .replay { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: var(--hot); cursor: pointer; }
+
+  /* ---------- Story ---------- */
+  .story { display: grid; gap: 16px; }
+  .figure {
+    display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: start;
+    padding: 18px; border-radius: 16px; background: var(--card); border: 1px solid var(--line);
+  }
+  .figure .num { font-family: "Unbounded", sans-serif; font-weight: 900; font-size: 2.2rem; color: var(--gold); line-height: 1; font-variant-numeric: tabular-nums; }
+  .figure p { font-size: .98rem; }
+  .figure strong { display: block; font-size: 1.05rem; }
+
+  /* ---------- Day in the life ---------- */
+  .day { display: grid; gap: 10px; }
+  .day .row { display: grid; grid-template-columns: 5.5rem 1fr; gap: 12px; align-items: center; }
+  .day .track { height: 26px; border-radius: 6px; background: var(--card); border: 1px solid var(--line); overflow: hidden; display: flex; }
+  .day .track span { display: block; height: 100%; background: var(--gold); }
+  .day .track span + span { margin-left: 2px; }
+  .day .row small { color: var(--muted); font-size: .85rem; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: .85rem; color: var(--muted); }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 6px; background: var(--gold); }
+  .legend i.mine { background: repeating-linear-gradient(135deg, var(--hot) 0 3px, transparent 3px 6px); border: 1px solid var(--hot); }
+
+  /* ---------- Pay ladder ---------- */
+  .ladder { display: grid; gap: 8px; }
+  .ladder .r { display: grid; grid-template-columns: minmax(0, 8.5rem) 1fr; gap: 10px; align-items: center; }
+  .ladder .lab { font-size: .9rem; line-height: 1.25; }
+  .ladder .lab small { display: block; color: var(--muted); font-size: .78rem; }
+  .ladder .scale { position: relative; height: 30px; }
+  .ladder .fill { position: absolute; top: 3px; bottom: 3px; border-radius: 4px; background: var(--gold); min-width: 4px; }
+  .ladder .fill.mine { background: repeating-linear-gradient(135deg, var(--hot) 0 4px, transparent 4px 8px); border: 2px solid var(--hot); }
+  .ladder .val { position: absolute; top: 50%; transform: translateY(-50%); left: calc(var(--x) + 8px); font-size: .82rem; font-weight: 800; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .ladder .val.flip { left: auto; right: calc(100% - var(--x) + 8px); }
+  .axis { display: flex; justify-content: space-between; margin-left: calc(8.5rem + 10px); font-size: .75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .note { font-size: .88rem; color: var(--muted); }
+  @media (max-width: 430px) {
+    .ladder .r { grid-template-columns: minmax(0, 7rem) 1fr; }
+    .axis { margin-left: calc(7rem + 10px); }
+  }
+
+  /* ---------- Paths ---------- */
+  .paths { display: grid; gap: 12px; }
+  .path { padding: 16px 18px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); display: grid; gap: 6px; }
+  .path.mine { border-color: var(--gold); box-shadow: inset 4px 0 0 var(--gold); }
+  .path .meta { font-size: .85rem; color: var(--muted); }
+  .path ul { margin: 4px 0 0; padding-left: 18px; font-size: .95rem; }
+  .now { padding: 18px; border-radius: 14px; background: var(--gold-soft); display: grid; gap: 8px; }
+  .now ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+
+  /* ---------- Try it ---------- */
+  .editor { display: grid; gap: 12px; }
+  textarea {
+    width: 100%; min-height: 150px; resize: vertical;
+    font-family: "JetBrains Mono", Consolas, monospace; font-size: .92rem; line-height: 1.5;
+    color: var(--code-ink); background: var(--code-bg); border: 0; border-radius: 12px; padding: 14px;
+  }
+  .preview { padding: 22px; border-radius: 12px; border: 2px dashed var(--line); background: var(--card); min-height: 90px; }
+  .preview h2, .preview h1, .preview h3 { font-family: "Manrope", sans-serif; margin: 0 0 8px; }
+  .preview p { margin: 0 0 12px; }
+  .preview button { font: inherit; font-weight: 700; padding: 10px 16px; border-radius: 10px; border: 0; background: var(--hot); color: #fff; cursor: pointer; }
+  .toast { font-weight: 800; color: var(--hot); min-height: 1.5em; }
+  .prompt { display: grid; gap: 10px; }
+  .prompt pre {
+    margin: 0; white-space: pre-wrap; font-family: "JetBrains Mono", Consolas, monospace; font-size: .88rem;
+    background: var(--code-bg); color: var(--code-ink); padding: 14px; border-radius: 12px;
+  }
+  .copy { justify-self: start; font: inherit; font-weight: 700; padding: 10px 16px; border-radius: 10px; border: 2px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; }
+  .links { display: grid; gap: 10px; padding: 0; margin: 0; list-style: none; }
+  .links li { display: grid; gap: 2px; padding: 12px 14px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); }
+  .links li a { font-weight: 800; }
+  .links li span { font-size: .9rem; color: var(--muted); }
+
+  /* ---------- Bug hunt ---------- */
+  .bug { display: grid; gap: 10px; }
+  .bug pre { margin: 0; overflow-x: auto; font-family: "JetBrains Mono", Consolas, monospace; font-size: .9rem; line-height: 1.55; background: var(--code-bg); color: var(--code-ink); padding: 14px; border-radius: 12px; }
+  .bug .fixed { color: var(--stage-gold); font-weight: 600; }
+  .reveal { justify-self: start; font: inherit; font-weight: 700; padding: 8px 14px; border-radius: 10px; border: 0; background: var(--hot-soft); color: var(--ink); cursor: pointer; }
+  .answer { padding: 12px 14px; border-radius: 10px; background: var(--gold-soft); font-size: .95rem; }
+
+  footer { display: grid; gap: 10px; font-size: .82rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 20px; }
+  footer ol { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .glow { transform: none !important; transition: none; }
+    .lyric.in { animation-duration: .01s; }
+  }
+</style>
+
+</head>
+<body>
+<main>
+  <div class="top">
+    <div class="stage" id="stage" aria-label="One-minute lyric video: Going Live">
+      <div class="glow"></div>
+      <div class="grid"></div>
+      <div class="lyric" id="lyric" aria-live="polite"></div>
+      <button class="start" id="start" type="button" aria-label="Play the one-minute anthem">
+        <span class="btn"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>Play the anthem</span>
+        <span class="note">One minute. Turn your sound up.</span>
+      </button>
+      <div class="bar" aria-hidden="true"><i id="progress"></i></div>
+    </div>
+    <div class="caption">
+      <span>"Going Live" is an original song about building software. Words by Dave, music made with Suno.</span>
+      <button class="replay" id="replay" type="button" hidden>Play it again</button>
+      <span id="audio-note" role="status"></span>
+    </div>
+  </div>
+
+  <section id="who">
+    <span class="kicker">Who's talking</span>
+    <h2>I build the software millions of people use to find their families.</h2>
+    <p class="lede">Dave Saetrum. Software Development Manager at FamilySearch. Bachelor's and master's in computer science. Started as an intern.</p>
+    <div class="story">
+      <p>I was one of the three original engineers on <a href="https://www.familysearch.org/en/memories/">FamilySearch Memories</a>: the place where families upload photos, letters, and recorded stories about the people in their tree. Three engineers, one idea, and a product that is still growing.</p>
+      <div class="figure">
+        <div class="num">3</div>
+        <p><strong>engineers on the original Memories team</strong>Today Memories holds photos, documents, and voice recordings from millions of people around the world, and it has been talked about from the pulpit at General Conference.</p>
+      </div>
+      <p>Now I lead a team of engineers who build and run the websites and publishing tools behind RootsTech and the FamilySearch blog. I spend more time in conversations than in code these days, and I still love both.</p>
+    </div>
+  </section>
+
+  <section id="day">
+    <span class="kicker">What the job actually looks like</span>
+    <h2>Way less lonely than the movies make it.</h2>
+    <p>A real engineer's week is maybe a third writing new code. The rest is figuring out what to build with designers and product people, reading teammates' code before it ships, and hunting down why something broke. One survey of a thousand developers found about 42% of the week goes to fixing and improving code that already exists. Detective work, in a team.</p>
+    <div class="day" role="img" aria-label="A typical week: roughly a third writing new code, a third fixing and improving existing code, a third planning, design, and code review.">
+      <div class="row"><small>New code</small><div class="track"><span style="width:33%"></span></div></div>
+      <div class="row"><small>Fixing and improving</small><div class="track"><span style="width:42%"></span></div></div>
+      <div class="row"><small>Design, planning, review</small><div class="track"><span style="width:25%"></span></div></div>
+    </div>
+    <p class="note">Rough shape of a week. The 42% is from the Stripe developer survey; the rest is what I see on my team.</p>
+  </section>
+
+  <section id="pay">
+    <span class="kicker">What you'd make</span>
+    <h2>Real numbers, because you asked.</h2>
+    <p>Striped bars are what I've personally seen. Solid bars are U.S. Bureau of Labor Statistics data from May 2025. Utah pays a little under the national number, and costs a little less to live in.</p>
+    <div class="ladder" role="img" aria-label="Pay ladder: first job 65 to 80 thousand dollars; Utah entry level 77,810; Utah median 128,810; US median 135,980; US top ten percent 214,670; engineering manager 150 to 250 thousand.">
+      <div class="r"><div class="lab">First job out of school<small>what I've seen</small></div><div class="scale"><div class="fill mine" style="left:25%;width:5.8%"></div><span class="val" style="--x:30.8%">$65k to $80k</span></div></div>
+      <div class="r"><div class="lab">Utah, entry level<small>bottom 10% of developers</small></div><div class="scale"><div class="fill" style="left:0;width:29.9%"></div><span class="val" style="--x:29.9%">$77,810</span></div></div>
+      <div class="r"><div class="lab">Utah, typical<small>median developer</small></div><div class="scale"><div class="fill" style="left:0;width:49.5%"></div><span class="val" style="--x:49.5%">$128,810</span></div></div>
+      <div class="r"><div class="lab">U.S., typical<small>median developer</small></div><div class="scale"><div class="fill" style="left:0;width:52.3%"></div><span class="val" style="--x:52.3%">$135,980</span></div></div>
+      <div class="r"><div class="lab">U.S., top 10%<small>senior and staff engineers</small></div><div class="scale"><div class="fill" style="left:0;width:82.6%"></div><span class="val flip" style="--x:82.6%">$214,670</span></div></div>
+      <div class="r"><div class="lab">Engineering manager<small>my job</small></div><div class="scale"><div class="fill mine" style="left:57.7%;width:38.5%"></div><span class="val flip" style="--x:57.7%">$150k to $250k</span></div></div>
+    </div>
+    <div class="axis"><span>$0</span><span>$130k</span><span>$260k</span></div>
+    <p class="note">For comparison, the median U.S. household earned about $84,000 in 2024. Software developer jobs are projected to grow 10% over the next decade, around 185,000 new positions.</p>
+  </section>
+
+  <section id="paths">
+    <span class="kicker">How to get there</span>
+    <h2>Four roads. I took the first one.</h2>
+    <div class="paths">
+      <div class="path mine">
+        <h3>Computer science degree</h3>
+        <span class="meta">Four years. This is my path, plus a master's after.</span>
+        <p>The most common route and the one most big employers still expect. Utah tuition, per year, before scholarships: UVU about $6,500, BYU about $7,000 for members, Utah State about $8,600, University of Utah about $9,600.</p>
+      </div>
+      <div class="path">
+        <h3>Start at a two-year school</h3>
+        <span class="meta">Two years to an associate degree, then transfer or start working.</span>
+        <p>UVU and Salt Lake Community College both offer this. Same classes, lower price, and many people finish the bachelor's later while working.</p>
+      </div>
+      <div class="path">
+        <h3>Coding bootcamp</h3>
+        <span class="meta">About 14 weeks, about $13,600 on average.</span>
+        <p>Fast and focused on job skills. Graduates in a 2025 survey averaged about $71,000 in their first job, with 79% employed within six months. Works best for people who already know they love this.</p>
+      </div>
+      <div class="path">
+        <h3>Self-taught with a portfolio</h3>
+        <span class="meta">Free. No fixed timeline.</span>
+        <p>Build real things people can click on and put them on GitHub. Harder to get the first interview without a degree, and completely possible. Nearly half of professional developers don't hold a bachelor's degree.</p>
+      </div>
+    </div>
+    <div class="now">
+      <h3>Things you can do right now, at 11 or at 17, that actually matter</h3>
+      <ol>
+        <li>Take the computer science class your school offers. In middle school that's often a coding elective or Scratch; in high school, AP Computer Science Principles counts.</li>
+        <li>Build one thing you'd actually use: a game, a tracker for your team, a site for a family business. Finish it.</li>
+        <li>Learn to use AI tools to build faster, and learn enough to know when they're wrong.</li>
+        <li>In college, get an internship the summer after your first or second year. Mine led to my first job.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="try">
+    <span class="kicker">Try it right now</span>
+    <h2>Change the code. Watch it change.</h2>
+    <p>Edit the words, the emoji, anything in the dark box. The card below it updates as you type. That's the whole loop: write, run, look, fix.</p>
+    <div class="editor">
+      <label for="code" hidden>Editable HTML</label>
+      <textarea id="code" spellcheck="false">&lt;h2&gt;Hi, I'm Dave 👋&lt;/h2&gt;
+&lt;p&gt;In ten years I'll be building &lt;b&gt;apps for space missions&lt;/b&gt;.&lt;/p&gt;
+&lt;button&gt;🚀 Launch it&lt;/button&gt;</textarea>
+      <div class="preview" id="preview"></div>
+      <div class="toast" id="toast" aria-live="polite"></div>
+    </div>
+    <div class="prompt">
+      <h3>Then build something real with an AI helper</h3>
+      <p>Open ChatGPT, Claude, or Gemini on your phone and paste this. Change the part in brackets.</p>
+      <pre id="prompt-text">Build me a one-page web app that [tracks my personal records for track practice]. Put everything in a single HTML file I can open on my phone, make it look good, and explain what each part of the code does in plain English.</pre>
+      <button class="copy" id="copy" type="button">Copy the prompt</button>
+    </div>
+    <h3>Free places to keep going</h3>
+    <ul class="links">
+      <li><a href="https://code.org/hourofcode">Hour of Code</a><span>One-hour projects, no account, works on a phone. Start here tonight.</span></li>
+      <li><a href="https://www.freecodecamp.org/learn">freeCodeCamp</a><span>Real HTML, CSS, and JavaScript lessons, free forever, phone-friendly editor.</span></li>
+      <li><a href="https://www.khanacademy.org/computing/computer-programming">Khan Academy programming</a><span>JavaScript from zero, with drawings and animations.</span></li>
+      <li><a href="https://editor.p5js.org">p5.js editor</a><span>Code that makes art. No account needed to run it.</span></li>
+      <li><a href="https://scratch.mit.edu">Scratch</a><span>Drag-and-drop games and animations. The best start if you're younger. Works best on a tablet or computer.</span></li>
+    </ul>
+  </section>
+
+  <section id="bug">
+    <span class="kicker">Think like an engineer</span>
+    <h2>Find the bug.</h2>
+    <p>Half the job is this. Each snippet has one mistake. Guess, then tap to check.</p>
+    <div class="bug">
+      <pre>let total = 0;
+for (let i = 1; i &lt;= 10; i++) {
+  total + i;
+}
+console.log(total);   // prints 0. Why?</pre>
+      <button class="reveal" type="button" data-answer="a1">Show me</button>
+      <div class="answer" id="a1" hidden><code>total + i</code> adds the numbers and then throws the result away. It needs <code>total += i</code>, which adds <em>and saves</em>. Every engineer alive has made this one.</div>
+    </div>
+    <div class="bug">
+      <pre>let age = 15;
+if (age = 18) {
+  console.log("You can vote!");
+}                      // says you can vote. You can't.</pre>
+      <button class="reveal" type="button" data-answer="a2">Show me</button>
+      <div class="answer" id="a2" hidden>One equals sign <em>sets</em> age to 18. Comparing takes two: <code>age === 18</code>. The computer did exactly what it was told, which is the whole problem with computers.</div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Made for the youth career night. Questions afterward are welcome, and so are questions in ten years.</p>
+    <ol>
+      <li>Pay and job growth: <a href="https://www.bls.gov/ooh/computer-and-information-technology/software-developers.htm">Bureau of Labor Statistics, Software Developers</a>, May 2025 wages, 2025 to 2035 projections.</li>
+      <li>Utah pay: <a href="https://www.onetonline.org/link/localwages/15-1252.00?st=UT">O*NET local wages, Utah</a>, from BLS state data, 2025.</li>
+      <li>Tuition: each school's published 2025 to 2026 in-state rates. Bootcamp cost and outcomes: <a href="https://www.coursereport.com/coding-bootcamp-ultimate-guide">Course Report</a>.</li>
+      <li>Household income: <a href="https://www.census.gov/newsroom/press-releases/2025/income-poverty-health-insurance-coverage.html">U.S. Census Bureau, Income in the United States: 2024</a>. Developers without a bachelor's degree: <a href="https://survey.stackoverflow.co/2025/developers">Stack Overflow Developer Survey 2025</a>.</li>
+      <li>Time spent fixing existing code: <a href="https://stripe.com/files/reports/the-developer-coefficient.pdf">Stripe and Harris Poll, The Developer Coefficient</a>.</li>
+      <li>Starting pay and manager pay ranges are Dave's own observation, not a statistic.</li>
+    </ol>
+  </footer>
+</main>
+
+<script>
+(function () {
+  // ---------- The 30-second lyric video ----------
+  // going-live.mp3 is published next to this page. Cue times come from a word-level transcription of the track.
+  // If the audio cannot load, the page falls back to a synthesized beat and says so under the video.
+  var AUDIO_SRC = "going-live.mp3";
+  var BPM = 128;
+  var DURATION = 68.72;
+  var CUES = [
+    { t: 0.65,  text: "Blank screen, blinking line, the whole world in my hands" },
+    { t: 4.95,  text: "Every bug's a door, every fix a plan" },
+    { t: 8.55,  text: "Think it, type it, break it, build it back tonight" },
+    { t: 11.45, text: "Three, two, one, hit run" },
+    { t: 16.4,  text: "Nobody sees the hours, they only see the light" },
+    { t: 20.2,  text: "But I know what I made, and I made it right" },
+    { t: 26.6,  text: "Watch it come alive, alive", chorus: true },
+    { t: 30.3,  text: "Something out of nothing and I built it with my mind", chorus: true },
+    { t: 33.85, text: "Ship it to the sky, tonight", chorus: true },
+    { t: 37.65, text: "Every line I write can light up someone's life", chorus: true },
+    { t: 41.6,  text: "We're gonna run it, run it, run it, we're going live", chorus: true },
+    { t: 45.1,  text: "We're gonna run it, run it, run it, we're going live", chorus: true },
+    { t: 48.05, text: "Watch it come alive, alive", chorus: true },
+    { t: 52.05, text: "Something out of nothing and I built it with my mind", chorus: true },
+    { t: 55.65, text: "Ship it to the sky, tonight", chorus: true },
+    { t: 59.55, text: "Every line I write can light up someone's life", chorus: true },
+    { t: 63.5,  text: "We're gonna run it, run it, run it, we're going live", chorus: true },
+    { t: 66.4,  title: true, text: "GOING LIVE", sub: "Software engineering. Your turn." }
+  ];
+
+  var stage = document.getElementById("stage");
+  var lyric = document.getElementById("lyric");
+  var start = document.getElementById("start");
+  var replay = document.getElementById("replay");
+  var progress = document.getElementById("progress");
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var audioNote = document.getElementById("audio-note");
+  var audio = null, ctx = null, startedAt = 0, raf = 0, cueIndex = -1, running = false;
+  var analyser = null, bins = null, beatSmooth = 0;
+
+  function now() {
+    if (audio) return audio.currentTime;
+    if (ctx) return ctx.currentTime - startedAt;
+    return 0;
+  }
+
+  // Drive the glow from the track's own bass energy when we can; fall back to a fixed-tempo pulse.
+  function attachAnalyser() {
+    try {
+      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === "suspended") ctx.resume();
+      var src = ctx.createMediaElementSource(audio);
+      analyser = ctx.createAnalyser(); analyser.fftSize = 256; analyser.smoothingTimeConstant = 0.5;
+      src.connect(analyser); analyser.connect(ctx.destination);
+      bins = new Uint8Array(analyser.frequencyBinCount);
+    } catch (e) { analyser = null; }
+  }
+  function beatLevel(t) {
+    if (analyser) {
+      analyser.getByteFrequencyData(bins);
+      var sum = 0; for (var i = 1; i < 8; i++) sum += bins[i];
+      var level = Math.max(0, (sum / 7 - 120) / 135);
+      beatSmooth = level > beatSmooth ? level : beatSmooth * 0.85;
+      return Math.min(1, beatSmooth);
+    }
+    var phase = (t * BPM / 60) % 1;
+    return Math.max(0, 1 - phase * 2.5);
+  }
+
+  function beatTrack(context) {
+    // Kick on every beat, hat on the off-beats, a rising pad through the chorus. Placeholder until the real song arrives.
+    var spb = 60 / BPM;
+    var beats = Math.ceil(DURATION / spb);
+    var master = context.createGain(); master.gain.value = 0.6; master.connect(context.destination);
+    for (var b = 0; b < beats; b++) {
+      var t0 = startedAt + b * spb;
+      var osc = context.createOscillator(); var g = context.createGain();
+      osc.frequency.setValueAtTime(150, t0); osc.frequency.exponentialRampToValueAtTime(40, t0 + 0.18);
+      g.gain.setValueAtTime(1, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.22);
+      osc.connect(g); g.connect(master); osc.start(t0); osc.stop(t0 + 0.25);
+      var noise = context.createBufferSource(); var buf = context.createBuffer(1, context.sampleRate * 0.05, context.sampleRate);
+      var d = buf.getChannelData(0); for (var i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+      noise.buffer = buf; var ng = context.createGain(); ng.gain.value = 0.25; noise.connect(ng); ng.connect(master); noise.start(t0 + spb / 2);
+    }
+    var pad = context.createOscillator(); var pg = context.createGain(); pad.type = "sawtooth";
+    pad.frequency.setValueAtTime(110, startedAt); pad.frequency.setValueAtTime(146.8, startedAt + 7.5); pad.frequency.setValueAtTime(164.8, startedAt + 22.5);
+    pg.gain.setValueAtTime(0.0001, startedAt); pg.gain.exponentialRampToValueAtTime(0.08, startedAt + 7.5); pg.gain.setValueAtTime(0.0001, startedAt + DURATION);
+    var filt = context.createBiquadFilter(); filt.type = "lowpass"; filt.frequency.value = 900;
+    pad.connect(filt); filt.connect(pg); pg.connect(master); pad.start(startedAt); pad.stop(startedAt + DURATION);
+  }
+
+  function showCue(c) {
+    lyric.className = "lyric";
+    void lyric.offsetWidth; // restart the pop-in
+    if (c.title) {
+      lyric.innerHTML = "";
+      lyric.appendChild(document.createTextNode(c.text));
+      var s = document.createElement("small"); s.textContent = c.sub; lyric.appendChild(s);
+      lyric.classList.add("title", "in");
+      stage.classList.add("live");
+    } else {
+      lyric.textContent = c.text;
+      lyric.classList.add("in");
+      if (c.chorus) { lyric.classList.add("chorus"); stage.classList.add("chorus"); }
+    }
+  }
+
+  function frame() {
+    var t = now();
+    var next = cueIndex + 1;
+    while (next < CUES.length && CUES[next].t <= t) { cueIndex = next; showCue(CUES[cueIndex]); next++; }
+    if (!reduced) {
+      stage.style.setProperty("--beat", String(beatLevel(t)));
+    }
+    progress.style.width = Math.min(100, t / DURATION * 100) + "%";
+    if (t >= DURATION) { finish(); return; }
+    raf = requestAnimationFrame(frame);
+  }
+
+  function finish() {
+    running = false;
+    cancelAnimationFrame(raf);
+    if (audio) { audio.pause(); }
+    replay.hidden = false;
+    stage.classList.remove("chorus");
+  }
+
+  function play() {
+    if (running) return;
+    running = true; cueIndex = -1;
+    stage.classList.remove("chorus", "live");
+    stage.classList.add("playing");
+    replay.hidden = true;
+    lyric.className = "lyric";
+    if (AUDIO_SRC) {
+      if (!audio) {
+        audio = new Audio(AUDIO_SRC); audio.preload = "auto"; audio.crossOrigin = "anonymous";
+        audio.onended = finish;
+        audio.onerror = fallbackToBeat;
+        audio.oncanplay = function () { if (!analyser) attachAnalyser(); };
+      }
+      audio.currentTime = 0;
+      audio.play().catch(fallbackToBeat);
+    } else {
+      playBeat();
+    }
+    raf = requestAnimationFrame(frame);
+  }
+
+  function fallbackToBeat() {
+    if (!running || audio === null) return;
+    audio = null; analyser = null;
+    audioNote.textContent = "The song didn't load on this device, so this is the lyric timing over a placeholder beat.";
+    playBeat();
+  }
+
+  function playBeat() {
+    try {
+      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === "suspended") ctx.resume();
+      startedAt = ctx.currentTime + 0.05;
+      beatTrack(ctx);
+    } catch (e) {
+      ctx = null; startedAt = performance.now() / 1000;
+      // With no audio at all, fall back to wall-clock timing.
+      now = function () { return performance.now() / 1000 - startedAt; };
+    }
+  }
+
+  start.addEventListener("click", play);
+  replay.addEventListener("click", play);
+
+  // ---------- Live editor ----------
+  var code = document.getElementById("code");
+  var preview = document.getElementById("preview");
+  var toast = document.getElementById("toast");
+  function render() {
+    var doc = new DOMParser().parseFromString(code.value, "text/html");
+    doc.querySelectorAll("script, style, iframe, object, embed, link, meta").forEach(function (n) { n.remove(); });
+    doc.querySelectorAll("*").forEach(function (el) {
+      Array.prototype.slice.call(el.attributes).forEach(function (a) {
+        if (/^on/i.test(a.name) || /javascript:/i.test(a.value)) el.removeAttribute(a.name);
+      });
+    });
+    preview.innerHTML = doc.body.innerHTML;
+  }
+  code.addEventListener("input", render);
+  preview.addEventListener("click", function (e) {
+    if (e.target.closest("button")) {
+      toast.textContent = "It ran. You just shipped code.";
+      setTimeout(function () { toast.textContent = ""; }, 2500);
+    }
+  });
+  render();
+
+  // ---------- Copy the prompt ----------
+  var copy = document.getElementById("copy");
+  var promptText = document.getElementById("prompt-text");
+  copy.addEventListener("click", function () {
+    var text = promptText.textContent;
+    var done = function () { copy.textContent = "Copied"; setTimeout(function () { copy.textContent = "Copy the prompt"; }, 2000); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { selectPrompt(); });
+    } else { selectPrompt(); }
+  });
+  function selectPrompt() {
+    var range = document.createRange(); range.selectNodeContents(promptText);
+    var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+    copy.textContent = "Selected. Long-press to copy.";
+  }
+
+  // ---------- Bug reveals ----------
+  document.querySelectorAll(".reveal").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var ans = document.getElementById(btn.getAttribute("data-answer"));
+      ans.hidden = !ans.hidden;
+      btn.textContent = ans.hidden ? "Show me" : "Hide it";
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
