@@ -158,6 +158,17 @@
   .start .btn svg { width: 22px; height: 22px; }
   .start .note { font-size: .9rem; color: var(--stage-ink); opacity: .8; }
   .stage.playing .start { display: none; }
+  .ctl {
+    position: absolute; right: 14px; bottom: 28px; z-index: 4;
+    width: 46px; height: 46px; border-radius: 50%; border: 0; cursor: pointer;
+    background: rgba(255, 249, 236, .18); color: var(--stage-ink);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    display: grid; place-items: center;
+  }
+  .ctl svg { width: 20px; height: 20px; fill: currentColor; }
+  .ctl:hover { background: rgba(255, 249, 236, .3); }
+  .stage.paused .lyric { opacity: .35; }
+  .hint { position: absolute; left: 16px; bottom: 30px; z-index: 3; font-size: .8rem; color: var(--stage-ink); opacity: .7; }
   .bar { position: absolute; left: 16px; right: 16px; bottom: 14px; height: 4px; background: rgba(255,255,255,.18); border-radius: 2px; overflow: hidden; z-index: 2; }
   .bar i { display: block; height: 100%; width: 0; background: var(--stage-gold); }
   .caption { display: flex; justify-content: space-between; gap: 12px; font-size: .9rem; color: var(--muted); flex-wrap: wrap; }
@@ -261,6 +272,10 @@
         <span class="btn"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>Play the anthem</span>
         <span class="note">One minute. Turn your sound up.</span>
       </button>
+      <button class="ctl" id="pause" type="button" aria-label="Pause" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path id="pause-icon" d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+      </button>
+      <span class="hint" id="hint" hidden>Tap anywhere to pause</span>
       <div class="bar" aria-hidden="true"><i id="progress"></i></div>
     </div>
     <div class="caption">
@@ -449,7 +464,11 @@ if (age = 18) {
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   var audioNote = document.getElementById("audio-note");
-  var audio = null, ctx = null, startedAt = 0, raf = 0, cueIndex = -1, running = false;
+  var pauseBtn = document.getElementById("pause");
+  var pauseIcon = document.getElementById("pause-icon");
+  var hint = document.getElementById("hint");
+  var PAUSE_PATH = "M6 5h4v14H6zm8 0h4v14h-4z", PLAY_PATH = "M7 4.5v15l13-7.5z";
+  var audio = null, ctx = null, startedAt = 0, raf = 0, cueIndex = -1, running = false, paused = false;
   var analyser = null, bins = null, beatSmooth = 0;
 
   function now() {
@@ -532,11 +551,34 @@ if (age = 18) {
   }
 
   function finish() {
-    running = false;
+    running = false; paused = false;
     cancelAnimationFrame(raf);
     if (audio) { audio.pause(); }
     replay.hidden = false;
-    stage.classList.remove("chorus");
+    pauseBtn.hidden = true; hint.hidden = true;
+    stage.classList.remove("chorus", "paused");
+  }
+
+  function setPausedUI(isPaused) {
+    paused = isPaused;
+    stage.classList.toggle("paused", isPaused);
+    pauseIcon.setAttribute("d", isPaused ? PLAY_PATH : PAUSE_PATH);
+    pauseBtn.setAttribute("aria-label", isPaused ? "Resume" : "Pause");
+    hint.textContent = isPaused ? "Paused. Tap to keep going" : "Tap anywhere to pause";
+  }
+
+  function togglePause() {
+    if (!running) return;
+    if (!paused) {
+      cancelAnimationFrame(raf);
+      if (audio) { audio.pause(); } else if (ctx) { ctx.suspend(); }
+      setPausedUI(true);
+    } else {
+      if (audio) { audio.play().catch(function () {}); if (ctx && ctx.state === "suspended") ctx.resume(); }
+      else if (ctx) { ctx.resume(); }
+      setPausedUI(false);
+      raf = requestAnimationFrame(frame);
+    }
   }
 
   function play() {
@@ -545,6 +587,8 @@ if (age = 18) {
     stage.classList.remove("chorus", "live");
     stage.classList.add("playing");
     replay.hidden = true;
+    pauseBtn.hidden = false; hint.hidden = false;
+    setPausedUI(false);
     lyric.className = "lyric";
     if (AUDIO_SRC) {
       if (!audio) {
@@ -583,6 +627,16 @@ if (age = 18) {
 
   start.addEventListener("click", play);
   replay.addEventListener("click", play);
+  pauseBtn.addEventListener("click", function (e) { e.stopPropagation(); togglePause(); });
+  stage.addEventListener("click", function (e) {
+    if (running && !e.target.closest("#start")) togglePause();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === " " && running && !e.target.closest("textarea, input, button")) { e.preventDefault(); togglePause(); }
+  });
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden && running && !paused) togglePause();
+  });
 
   // ---------- Live editor ----------
   var code = document.getElementById("code");
