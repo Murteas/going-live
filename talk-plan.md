@@ -41,8 +41,8 @@ Cut the hands-on to sixty seconds (name only) and cut the four roads to "degree,
 
 | File | What it is |
 |---|---|
-| `going-live.html` | The page behind the QR code. Published as a Claude artifact; the URL is in the README. |
-| `going-live-lyrics.md` | Lyrics, Suno style prompt, and steps to generate the song. |
-| `going-live.mp3` | The Suno track once you download it (not present until you do). |
+| `going-live.html` | The page behind the QR code. Published on GitHub Pages at https://murteas.github.io/going-live/ (details in the README). |
+| `going-live-lyrics.md` | Lyrics, Suno style prompts, and steps to generate the songs. |
+| `going-live.mp3` | The Going Live track you play at the table. `carry-it-home.mp3` and `going-live-mashup.mp3` are the other two songs. |
 | `qr-poster.html` | Printable QR poster for the table. |
 | `qr.png` | The QR code image on its own. |

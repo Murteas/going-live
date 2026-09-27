@@ -6,22 +6,24 @@ Dave's 10-minute software engineering session for a church youth career night in
 
 | File | What it is | Regenerate? |
 |---|---|---|
-| `going-live.html` | The page behind the QR code: animated lyric video (word-by-word karaoke timed from a faster-whisper transcription, canvas code rain, countdown numerals, chorus bursts, deploy bar), Dave's story, day-in-the-life, pay ladder, four education paths plus the Christmas MasterMind "built for fun" card, live code editor, AI prompt, find-the-bug. Source of truth. | Edit, run `build-site.py`, push from `site/` |
-| `going-live-lyrics.md` | Original lyrics, the Suno style line, and the steps to generate the track | Stable |
-| `going-live.mp3` | The Suno track, downloaded by Dave. Used at full length, embedded into the page as a data URI by Claude, lyric cues timed with faster-whisper | From Suno |
+| `going-live.html` | The page behind the QR code: animated lyric video (word-by-word karaoke timed from a faster-whisper transcription, canvas code rain, countdown numerals, chorus bursts, deploy bar), Dave's story, day-in-the-life, pay ladder, four education paths plus the Christmas MasterMind "built for fun" card, live code editor, AI prompt, find-the-bug. Source of truth. | Edit, run `build-site.py`, commit and push |
+| `going-live-lyrics.md` | Original lyrics for every song, the Suno style lines, and the steps to generate a track | Stable |
+| `going-live.mp3` | The Suno track, downloaded by Dave. Used at full length and served as a separate file next to the page (`docs/going-live.mp3`), not embedded. Lyric cues timed with faster-whisper | From Suno |
+| `carry-it-home.mp3`, `going-live-mashup.mp3` | The other two Suno songs, copied into `docs/` the same way | From Suno |
 | `talk-plan.md` | Minute-by-minute run of the 10-minute session and answers to expected questions | Stable |
 | `talk-plan.html` | Phone-friendly render of the run sheet for Dave's Google Drive. Pandoc with `phone.css`, deliberately not the FS stylesheet since this is a personal doc | `pandoc talk-plan.md --standalone --embed-resources --css phone.css --metadata pagetitle="Going Live: the 10-minute run sheet" -o talk-plan.html` |
 | `phone.css` | Stylesheet for `talk-plan.html` only | Stable |
 | `qr-poster.html` | Printable table poster with the QR code. Hand-built, not a pandoc render, so the fs-html-gen rule does not apply | From `make-qr.py` |
 | `qr.png` | The QR code alone | From `make-qr.py` |
 | `make-qr.py` | Generates `qr.png` and `qr-poster.html` from the published URL | Run after any URL change |
+| `build-site.py` | Wraps `going-live.html` in a full HTML skeleton and copies every `*.mp3` in the project root into `docs/` | Run after any edit to `going-live.html` or a new song |
+| `docs/` | The published site: GitHub Pages serves `main` branch, `/docs` folder. Build output only; edit `going-live.html`, never `docs/index.html` | From `build-site.py` |
 
-| `build-site.py` | Wraps `going-live.html` in a full HTML skeleton and copies the song into `site/` | Run after any edit to `going-live.html`, then commit and push from `site/` |
-| `site/` | Its own git repo, pushed to the public GitHub repo `Murteas/going-live`, served by GitHub Pages. Build output only; edit `going-live.html`, never `site/index.html` | From `build-site.py` |
+The whole folder is the public GitHub repo `Murteas/going-live`. Only `docs/` is served on the site; everything else, including the talk plan, is visible on github.com.
 
 ## Published URL
 
-**https://murteas.github.io/going-live/** is the QR target (GitHub Pages, public, no sign-in). The URL is recorded in `make-qr.py` and on the poster; if it ever changes, rerun `make-qr.py` and reprint the poster.
+**https://murteas.github.io/going-live/** is the QR target (GitHub Pages, public, no sign-in, source `main` /docs). The URL is recorded in `make-qr.py` and on the poster; if it ever changes, rerun `make-qr.py` and reprint the poster.
 
 A copy also exists as a Claude artifact at https://claude.ai/artifact/PMCoH8gaWxysoq5XDA5YUJ, but the Church Claude workspace only allows sharing with Church accounts, so it is not the QR target and is not kept in sync.
 
@@ -29,7 +31,7 @@ A copy also exists as a Claude artifact at https://claude.ai/artifact/PMCoH8gaWx
 
 1. Edit `going-live.html`.
 2. `python build-site.py`
-3. In `site/`: `git add -A`, commit, `git push`. Pages redeploys in about a minute.
+3. From the project root: `git add -A`, commit, `git push`. Pages redeploys in about a minute.
 
 ## Guards
 
