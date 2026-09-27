@@ -1,4 +1,4 @@
-# Youth career night (personal, not CONTEV work)
+# Youth career night
 
 Dave's 10-minute software engineering session for a church youth career night in early October 2026, run three times as kids ages 11 to 18 rotate between career tables. Everything the kids see is on one published web page reached by QR code; the one-minute original song "Going Live" (Suno, 1:09, used whole) opens each round.
 
