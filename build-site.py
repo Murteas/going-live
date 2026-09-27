@@ -23,6 +23,7 @@ page = f"""<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="A one-minute original anthem and a one-page guide to a software engineering career for youth ages 11 to 18.">
 <meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230B0820'/><path d='M12 8.5v15l12-7.5z' fill='%23FFC24B'/></svg>">
 <style>
   :root {{ padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }}
   img {{ max-width: 100%; }}
