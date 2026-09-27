@@ -165,6 +165,15 @@
   .ctl svg { width: 20px; height: 20px; fill: currentColor; }
   .ctl:hover { background: rgba(255, 249, 236, .3); }
   .stage.paused .lyric { opacity: .35; }
+  .loading {
+    position: absolute; top: 16px; left: 50%; transform: translateX(-50%); z-index: 3;
+    padding: 6px 14px; border-radius: 999px; white-space: nowrap;
+    background: color-mix(in srgb, var(--stage-ink) 16%, transparent); color: var(--stage-ink);
+    font-size: .85rem; font-weight: 600;
+    animation: pulse 1.2s ease-in-out infinite alternate;
+  }
+  @keyframes pulse { from { opacity: .55; } to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .loading { animation: none; } }
   .hint { position: absolute; left: 16px; bottom: 30px; z-index: 3; font-size: .8rem; color: var(--stage-ink); opacity: .7; }
   .bar { position: absolute; left: 16px; right: 16px; bottom: 14px; height: 4px; background: rgba(255,255,255,.18); border-radius: 2px; overflow: hidden; z-index: 2; }
   .bar i { display: block; height: 100%; width: 0; background: var(--stage-gold); }
@@ -282,6 +291,7 @@
       <button class="ctl" id="pause" type="button" aria-label="Pause" hidden>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path id="pause-icon" d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
       </button>
+      <span class="loading" id="loading" role="status" hidden>Loading the song…</span>
       <span class="hint" id="hint" hidden>Tap anywhere to pause</span>
       <div class="bar" aria-hidden="true"><i id="progress"></i></div>
     </div>
@@ -546,6 +556,7 @@ if (age = 18) {
   var pauseBtn = document.getElementById("pause");
   var pauseIcon = document.getElementById("pause-icon");
   var hint = document.getElementById("hint");
+  var loadingEl = document.getElementById("loading"), loadingTimer = 0;
   var PAUSE_PATH = "M6 5h4v14H6zm8 0h4v14h-4z", PLAY_PATH = "M7 4.5v15l13-7.5z";
   var songsEl = document.getElementById("songs");
   var captionEl = document.getElementById("song-caption");
@@ -790,9 +801,18 @@ if (age = 18) {
     raf = requestAnimationFrame(frame);
   }
 
+  // The loading pill appears only if the song takes more than a moment to start or stalls mid-song,
+  // so a fast connection never sees it flash.
+  function setLoading(on) {
+    clearTimeout(loadingTimer);
+    if (on) loadingTimer = setTimeout(function () { loadingEl.hidden = false; }, 300);
+    else loadingEl.hidden = true;
+  }
+
   function finish() {
     running = false; paused = false;
     cancelAnimationFrame(raf);
+    setLoading(false);
     if (audio) { audio.pause(); }
     // If the tab was throttled and frames fell behind the song, still land on the title card.
     var CUES = song.cues;
@@ -817,9 +837,10 @@ if (age = 18) {
     if (!paused) {
       cancelAnimationFrame(raf);
       if (audio) { audio.pause(); } else if (ctx) { ctx.suspend(); }
+      setLoading(false);
       setPausedUI(true);
     } else {
-      if (audio) { audio.play().catch(function () {}); if (ctx && ctx.state === "suspended") ctx.resume(); }
+      if (audio) { setLoading(true); audio.play().catch(function () {}); if (ctx && ctx.state === "suspended") ctx.resume(); }
       else if (ctx) { ctx.resume(); }
       setPausedUI(false);
       raf = requestAnimationFrame(frame);
@@ -844,8 +865,11 @@ if (age = 18) {
       a.onended = finish;
       a.onerror = function () { if (a === audio) fallbackToBeat(); };
       a.oncanplay = function () { if (a === audio && !analyser) attachAnalyser(); };
+      a.onwaiting = function () { if (a === audio && running && !paused) setLoading(true); };
+      a.onplaying = function () { if (a === audio) setLoading(false); };
     }
     var playing = audio;
+    setLoading(true);
     audio.currentTime = 0;
     audio.play().catch(function () { if (playing === audio) fallbackToBeat(); });
     raf = requestAnimationFrame(frame);
@@ -860,11 +884,12 @@ if (age = 18) {
 
   function dropAudio() {
     if (audio) {
-      audio.onended = audio.onerror = audio.oncanplay = null;
+      audio.onended = audio.onerror = audio.oncanplay = audio.onwaiting = audio.onplaying = null;
       audio.pause(); audio.removeAttribute("src"); audio.load(); // stops any download still in flight
     }
     if (srcNode) { srcNode.disconnect(); srcNode = null; }
     audio = null; analyser = null;
+    setLoading(false);
   }
   function dropBeat() {
     if (beatMaster) { beatMaster.disconnect(); beatMaster = null; }
