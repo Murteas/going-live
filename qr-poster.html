@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Going Live poster</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;900&family=Manrope:wght@500;700&display=swap">
+<style>
+  @page { size: letter portrait; margin: 0.5in; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; display: grid; place-items: center;
+    background: #0B0820; color: #FFF9EC;
+    font-family: "Manrope", "Segoe UI", system-ui, sans-serif;
+  }
+  .sheet {
+    width: 7.5in; min-height: 10in; padding: .6in; box-sizing: border-box;
+    display: grid; align-content: space-between; gap: .4in; text-align: center;
+    background:
+      radial-gradient(circle at 20% 15%, rgba(255,61,138,.55) 0, transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(255,194,75,.55) 0, transparent 42%),
+      #0B0820;
+    border-radius: 24px;
+  }
+  h1 { font-family: "Unbounded", sans-serif; font-weight: 900; font-size: 64px; line-height: 1; margin: 0; letter-spacing: -.02em; }
+  h1 span { display: block; font-size: 22px; font-weight: 700; color: #FFC24B; margin-top: 14px; letter-spacing: 0; }
+  .qr { justify-self: center; background: #fff; padding: 22px; border-radius: 20px; box-shadow: 0 20px 70px rgba(255,61,138,.35); }
+  .qr img { display: block; width: 4.2in; height: 4.2in; }
+  p { margin: 0; font-size: 20px; font-weight: 500; line-height: 1.4; }
+  .who { font-size: 16px; opacity: .8; }
+  .url { font-size: 13px; opacity: .6; word-break: break-all; }
+  @media print { body { background: #fff; } .sheet { border-radius: 0; } }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>Going Live<span>Software engineering, in one minute</span></h1>
+  <div class="qr"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAbwAAAG8AQMAAACffoKcAAAABlBMVEUbF0D///+FHH4qAAACEUlEQVR42u2cS66EIBRESW/A/e+SHdCxxfvDNzEvKQbH9KTFMyEVrFtcbOPd1RsgICAg4F9gs+sY1+8aspvrY6N/2ssLEPDldYrwmMqNKj312efodT89hlYBRVq1RTWK8xTtPVQfQ6uAcq32agb8GbQKuJNWzaC6XH9mAK0C7uZX6/Ax11X8KuAWWl1ygOcfOQCgWqvlSt7g9gNL2MWsAiq02hf7GnOAo4qWdRVQqNVY75tEoz2YD3RqK0CxX42FlTsBywFycoUHABT61Vnv21s+Wtne0r4AtRWgcF2Ngeq9u5r+Dt8mmHpGq4AqrdoS2lO1ZTbV5IpWAcW1VTClpt5qX1sz3aJVQNW6Wkoq6wrwBTb3saBVQGEO4AupdasGDfvbn3wVUKpVz6ZKo3VLvdbkq4B6D2Dtf7ajGs4axLTqtrjMKqDMr5azKjOhKmmVl2PMKqAiB8hbV171547WrF5mFVBWW5kg166Ah5toFVDnV8vpgHTfmqw6+SqgWKvJl3rzf+7Cwq8C7qDVO+pPOWruv4r1F1oFVNVW6VBAbA6M/SojWgJmFVBTW3nh31o9eR22AMhXAXfwq+vrPu1hHaUBm1kFFOUA7eH7FbPqzx+zoicQcB+tpv7/9cgVewGAm2i1dAkuiypnrgH38ate/o/cyEr/KuBOOYDtT8XkyobCUUFmFVCgVT6kDAgICPh/4BcTBxS3bzppMwAAAABJRU5ErkJggg==" alt="QR code linking to the Going Live page"></div>
+  <div>
+    <p>Scan it. Play the song. Change the code.<br>Then find out what an engineer actually makes.</p>
+    <p class="who" style="margin-top:14px">Dave Saetrum, Software Development Manager at FamilySearch</p>
+  </div>
+  <p class="url">https://murteas.github.io/going-live/</p>
+</div>
+</body>
+</html>
