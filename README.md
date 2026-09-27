@@ -53,5 +53,5 @@ To preview locally, serve the project root and open `/docs/index.html`. `python 
 ## Guards
 
 - The pay figures on the page carry their sources in the footer. Two ranges (first job $65k to $80k, engineering manager $150k to $250k) are the presenter's own observation and are labeled that way on the page. Do not present them as statistics.
-- The lyrics are original. Do not add lines from the real "Golden" or any other published song; the page is public.
+- The lyrics are original. Do not add lines from any other published song; the page is public.
 - The page is dark-first in the hero by design and follows the viewer's theme below it.
