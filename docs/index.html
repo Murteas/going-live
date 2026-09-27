@@ -189,6 +189,7 @@
   }
   .song b { font-family: "Unbounded", sans-serif; font-weight: 700; font-size: .78rem; line-height: 1.2; }
   .song span { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .song .genre { font-size: .72rem; font-weight: 700; line-height: 1.2; }
   .song[aria-pressed="true"] { border-color: var(--hot); background: var(--hot-soft); box-shadow: inset 0 0 0 1.5px var(--hot); }
   .song:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
   .caption { display: flex; justify-content: space-between; gap: 12px; font-size: .9rem; color: var(--muted); flex-wrap: wrap; }
@@ -462,7 +463,7 @@ if (age = 18) {
   // song). If the audio cannot load, the page falls back to a synthesized beat at the song's tempo and says so
   // under the video. The palette sets the stage's CSS colors and the canvas effects read them back.
   var SONGS = [{
-    id: "going-live", title: "Going Live", button: "Going Live", src: "going-live.mp3", bpm: 128, duration: 68.72,
+    id: "going-live", title: "Going Live", button: "Going Live", genre: "K-pop", src: "going-live.mp3", bpm: 128, duration: 68.72,
     stageLabel: "One-minute lyric video: Going Live",
     startLabel: "Play the anthem", startNote: "One minute. Turn your sound up.", startAria: "Play the one-minute anthem",
     card: "GOING LIVE", cardLine: "Software engineering. Your turn.",
@@ -489,7 +490,7 @@ if (age = 18) {
     { t: 66.4, kind: "title", words: [] }
   ]
   }, {
-    id: "carry-it-home", title: "Carry It Home", button: "Carry It Home", src: "carry-it-home.mp3", bpm: 82, duration: 111.2,
+    id: "carry-it-home", title: "Carry It Home", button: "Carry It Home", genre: "Country", src: "carry-it-home.mp3", bpm: 82, duration: 111.2,
     stageLabel: "Lyric video: Carry It Home",
     startLabel: "Play the song", startNote: "Under two minutes. Turn your sound up.", startAria: "Play Carry It Home, just under two minutes",
     card: "CARRY IT HOME", cardLine: "Software engineering. Your turn.",
@@ -513,7 +514,7 @@ if (age = 18) {
     { t: 95.54, kind: "title", words: [] }
   ]
   }, {
-    id: "mashup", title: "Going Live x Carry It Home", button: "Mashup", src: "going-live-mashup.mp3", bpm: 124, duration: 165.84,
+    id: "mashup", title: "Going Live x Carry It Home", button: "Mashup", genre: "K-pop × Country", src: "going-live-mashup.mp3", bpm: 124, duration: 165.84,
     stageLabel: "Lyric video: Going Live and Carry It Home mashup",
     startLabel: "Play the mashup", startNote: "Under three minutes. Turn your sound up.", startAria: "Play the mashup, just under three minutes",
     card: "GOING LIVE × CARRY IT HOME", cardLine: "Software engineering. Your turn.",
@@ -690,7 +691,9 @@ if (age = 18) {
   function drawDeploy(t) {
     var titleAt = song.cues[song.cues.length - 1].t;
     var k = Math.min(1, Math.max(0, (t - titleAt) / 1.5));
-    var bw = Math.min(W * 0.7, 420), bh = 10, x = (W - bw) / 2, y = H * 0.7;
+    // Sit below the title card (a two-line title pushes its subtitle past 70%), but stay clear of the hint row.
+    var bw = Math.min(W * 0.7, 420), bh = 10, x = (W - bw) / 2;
+    var y = Math.min(H - 80, Math.max(H * 0.7, lyric.offsetTop + lyric.offsetHeight));
     g2.fillStyle = PAL.ink; g2.globalAlpha = 0.18; roundRect(x, y, bw, bh, 5); g2.fill(); g2.globalAlpha = 1;
     if (k > 0) { g2.fillStyle = k < 1 ? PAL.gold : PAL.accent; roundRect(x, y, Math.max(bh, bw * k), bh, 5); g2.fill(); }
     g2.fillStyle = PAL.ink; g2.globalAlpha = 0.85; g2.font = "600 13px Manrope, sans-serif"; g2.textAlign = "center"; g2.textBaseline = "alphabetic";
@@ -920,8 +923,9 @@ if (age = 18) {
     var b = document.createElement("button");
     b.type = "button"; b.className = "song"; b.dataset.song = sg.id;
     var name = document.createElement("b"); name.textContent = sg.button;
+    var genre = document.createElement("span"); genre.className = "genre"; genre.textContent = sg.genre;
     var len = document.createElement("span"); len.textContent = clock(sg.duration);
-    b.append(name, len);
+    b.append(name, genre, len);
     b.addEventListener("click", function () { selectSong(sg); });
     songsEl.appendChild(b);
   });
