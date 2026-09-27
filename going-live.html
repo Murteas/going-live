@@ -17,8 +17,10 @@
     --stage: #0B0820;
     --stage-gold: #FFC24B;
     --stage-hot: #FF3D8A;
-    --stage-cyan: #5FE6FF;
+    --stage-accent: #5FE6FF;
     --stage-ink: #FFF9EC;
+    --stage-soft: #FFF3C4;
+    --stage-rain: #A096E6;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -97,7 +99,7 @@
     background:
       radial-gradient(circle at 25% 25%, var(--stage-hot) 0, transparent 38%),
       radial-gradient(circle at 78% 70%, var(--stage-gold) 0, transparent 40%),
-      radial-gradient(circle at 60% 20%, var(--stage-cyan) 0, transparent 30%);
+      radial-gradient(circle at 60% 20%, var(--stage-accent) 0, transparent 30%);
     opacity: .28;
     filter: blur(30px);
     transform: scale(calc(1 + var(--beat) * .08));
@@ -133,8 +135,9 @@
   .lyric.count .w.on { color: var(--stage-gold); }
   .lyric.chorus { font-size: clamp(1.5rem, 6.4vw, 2.5rem); font-weight: 900; }
   .lyric.chorus .w { color: var(--stage-ink); opacity: .32; }
-  .lyric.chorus .w.on { opacity: 1; background: linear-gradient(100deg, var(--stage-gold), #FFF3C4 45%, var(--stage-hot)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lyric.chorus .w.on { opacity: 1; background: linear-gradient(100deg, var(--stage-gold), var(--stage-soft) 45%, var(--stage-hot)); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .lyric.title { font-size: clamp(2.2rem, 10vw, 4rem); font-weight: 900; letter-spacing: -.02em; color: var(--stage-ink); }
+  .lyric.title.long { font-size: clamp(1.6rem, 7vw, 2.6rem); }
   .lyric.title small { display: block; font-family: "Manrope", sans-serif; font-weight: 600; font-size: .95rem; letter-spacing: 0; margin-top: 12px; color: var(--stage-gold); }
   @keyframes popin { to { opacity: 1; transform: none; } }
   .start {
@@ -147,7 +150,7 @@
     padding: 14px 22px 14px 16px; border-radius: 999px;
     background: var(--stage-ink); color: var(--stage);
     font-family: "Unbounded", sans-serif; font-weight: 700; font-size: 1rem;
-    box-shadow: 0 10px 40px rgba(255, 61, 138, .35);
+    box-shadow: 0 10px 40px color-mix(in srgb, var(--stage-hot) 35%, transparent);
   }
   .start .btn svg { width: 22px; height: 22px; }
   .start .note { font-size: .9rem; color: var(--stage-ink); opacity: .8; }
@@ -165,6 +168,16 @@
   .hint { position: absolute; left: 16px; bottom: 30px; z-index: 3; font-size: .8rem; color: var(--stage-ink); opacity: .7; }
   .bar { position: absolute; left: 16px; right: 16px; bottom: 14px; height: 4px; background: rgba(255,255,255,.18); border-radius: 2px; overflow: hidden; z-index: 2; }
   .bar i { display: block; height: 100%; width: 0; background: var(--stage-gold); }
+  .songs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .song {
+    min-height: 56px; padding: 8px 6px; border-radius: 14px; cursor: pointer;
+    border: 1.5px solid var(--line); background: var(--card); color: var(--ink); font: inherit;
+    display: grid; align-content: center; justify-items: center; gap: 3px; text-align: center;
+  }
+  .song b { font-family: "Unbounded", sans-serif; font-weight: 700; font-size: .78rem; line-height: 1.2; }
+  .song span { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .song[aria-pressed="true"] { border-color: var(--hot); background: var(--hot-soft); box-shadow: inset 0 0 0 1.5px var(--hot); }
+  .song:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
   .caption { display: flex; justify-content: space-between; gap: 12px; font-size: .9rem; color: var(--muted); flex-wrap: wrap; }
   .replay { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: var(--hot); cursor: pointer; }
 
@@ -262,8 +275,8 @@
       <canvas class="fx" id="fx" aria-hidden="true"></canvas>
       <div class="lyric" id="lyric" aria-live="polite"></div>
       <button class="start" id="start" type="button" aria-label="Play the one-minute anthem">
-        <span class="btn"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>Play the anthem</span>
-        <span class="note">One minute. Turn your sound up.</span>
+        <span class="btn"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg><span id="start-label">Play the anthem</span></span>
+        <span class="note" id="start-note">One minute. Turn your sound up.</span>
       </button>
       <button class="ctl" id="pause" type="button" aria-label="Pause" hidden>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path id="pause-icon" d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
@@ -271,8 +284,9 @@
       <span class="hint" id="hint" hidden>Tap anywhere to pause</span>
       <div class="bar" aria-hidden="true"><i id="progress"></i></div>
     </div>
+    <div class="songs" id="songs" role="group" aria-label="Pick a song"></div>
     <div class="caption">
-      <span>"Going Live" is an original song about building software. Words by Dave, music made with Suno.</span>
+      <span id="song-caption">"Going Live" is an original song about building software. Words by Dave, music made with Suno.</span>
       <button class="replay" id="replay" type="button" hidden>Play it again</button>
       <span id="audio-note" role="status"></span>
     </div>
@@ -427,14 +441,19 @@ if (age = 18) {
 
 <script>
 (function () {
-  // ---------- The one-minute lyric video ----------
-  // going-live.mp3 is published next to this page. Every word carries the time it is sung, taken from a
-  // word-level transcription of the track. If the audio cannot load, the page falls back to a synthesized
-  // beat and says so under the video.
-  var AUDIO_SRC = "going-live.mp3";
-  var BPM = 128;
-  var DURATION = 68.72;
-  var CUES = [
+  // ---------- The lyric video ----------
+  // Each song's mp3 is published next to this page and loads only when that song is played. Every word carries
+  // the time it is sung, from a word-level transcription of the track (time-lyrics.py makes the cues for a new
+  // song). If the audio cannot load, the page falls back to a synthesized beat at the song's tempo and says so
+  // under the video. The palette sets the stage's CSS colors and the canvas effects read them back.
+  var SONGS = [{
+    id: "going-live", title: "Going Live", button: "Going Live", src: "going-live.mp3", bpm: 128, duration: 68.72,
+    stageLabel: "One-minute lyric video: Going Live",
+    startLabel: "Play the anthem", startNote: "One minute. Turn your sound up.", startAria: "Play the one-minute anthem",
+    card: "GOING LIVE", cardLine: "Software engineering. Your turn.",
+    caption: '"Going Live" is an original song about building software. Words by Dave, music made with Suno.',
+    palette: { stage: "#0B0820", gold: "#FFC24B", hot: "#FF3D8A", accent: "#5FE6FF", ink: "#FFF9EC", soft: "#FFF3C4", rain: "#A096E6" },
+    cues: [
     { t: 0.65, kind: "verse", words: [["Blank", 0.8], ["screen,", 1.44], ["blinking", 1.9], ["line,", 2.3], ["the", 2.9], ["whole", 3.3], ["world", 3.68], ["in", 4.08], ["my", 4.28], ["hands", 4.48]] },
     { t: 4.95, kind: "verse", words: [["Every", 5.1], ["bug's", 5.36], ["a", 6.02], ["door,", 6.1], ["every", 6.88], ["fix", 7.22], ["a", 7.56], ["plan", 7.96]] },
     { t: 8.53, kind: "verse", words: [["Think", 8.68], ["it,", 8.99], ["type", 9.19], ["it,", 9.45], ["break", 9.66], ["it,", 9.96], ["build", 10.17], ["it", 10.48], ["back", 10.63], ["tonight", 10.89]] },
@@ -453,7 +472,67 @@ if (age = 18) {
     { t: 59.55, kind: "chorus", words: [["Every", 59.7], ["line", 60.14], ["I", 60.52], ["write", 60.7], ["can", 60.98], ["light", 61.18], ["up", 61.42], ["someone's", 61.6], ["life", 62.38]] },
     { t: 63.51, kind: "run", words: [["We're", 63.66], ["gonna", 64.0], ["run", 64.18], ["it,", 64.52], ["run", 64.84], ["it,", 64.96], ["run", 65.28], ["it,", 65.4], ["we're", 65.6], ["going", 65.72], ["live", 65.9]] },
     { t: 66.4, kind: "title", words: [] }
-  ];
+  ]
+  }, {
+    id: "carry-it-home", title: "Carry It Home", button: "Carry It Home", src: "carry-it-home.mp3", bpm: 82, duration: 111.2,
+    stageLabel: "Lyric video: Carry It Home",
+    startLabel: "Play the song", startNote: "Under two minutes. Turn your sound up.", startAria: "Play Carry It Home, just under two minutes",
+    card: "CARRY IT HOME", cardLine: "Software engineering. Your turn.",
+    caption: '"Carry It Home" is an original song about code that keeps a family\'s photos and voices safe. Words by Dave, music made with Suno.',
+    palette: { stage: "#1C1008", gold: "#FFB547", hot: "#E0782F", accent: "#FFE7A3", ink: "#FFF6E6", soft: "#FFF0CC", rain: "#C9A26B" },
+    cues: [
+    { t: 12.07, kind: "verse", words: [["Grandma's", 12.22], ["voice", 12.72], ["on", 13.08], ["an", 13.48], ["old", 13.68], ["cassette,", 13.92], ["fading", 14.78], ["like", 15.28], ["the", 15.58], ["evening", 15.84], ["light", 16.2]] },
+    { t: 17.57, kind: "verse", words: [["Pictures", 17.72], ["in", 18.22], ["a", 18.56], ["shoebox,", 18.7], ["curling", 19.2], ["at", 19.7], ["the", 19.98], ["corners,", 20.08], ["stories", 20.57], ["slipping", 21.06], ["out", 21.5], ["of", 21.98], ["sight", 22.22]] },
+    { t: 22.79, kind: "verse", words: [["So", 22.94], ["I", 23.44], ["sat", 23.64], ["down", 23.94], ["at", 24.44], ["the", 24.88], ["keyboard", 25.14], ["and", 25.9], ["I", 26.4], ["wrote", 26.56], ["a", 26.88], ["little", 27.36], ["code", 27.9]] },
+    { t: 28.67, kind: "verse", words: [["Now", 28.82], ["her", 29.32], ["laugh", 29.48], ["will", 29.98], ["play", 30.3], ["forever,", 30.92], ["anywhere", 31.94], ["her", 32.66], ["grandkids", 33.26], ["go", 33.86]] },
+    { t: 35.85, kind: "chorus", words: [["Carry", 36.0], ["it", 36.5], ["home,", 37.14], ["carry", 38.92], ["it", 39.42], ["home", 39.7]] },
+    { t: 41.73, kind: "chorus", words: [["Every", 41.88], ["photo,", 42.6], ["every", 43.62], ["story,", 44.14], ["every", 44.92], ["voice", 45.5], ["we've", 46.06], ["ever", 46.56], ["known", 46.9]] },
+    { t: 48.13, kind: "chorus", words: [["Keep", 48.28], ["it", 48.78], ["safe", 49.04], ["forever,", 49.88], ["pass", 51.24], ["it", 51.74], ["down", 52.12], ["the", 52.52], ["line", 52.94]] },
+    { t: 54.07, kind: "chorus", words: [["Code", 54.22], ["can", 54.72], ["carry", 55.06], ["love", 55.66], ["a", 56.16], ["long,", 56.48], ["long", 57.08], ["time", 57.2]] },
+    { t: 60.53, kind: "pre", words: [["I", 60.68], ["was", 61.18], ["just", 61.36], ["a", 61.58], ["kid", 61.78], ["like", 62.0], ["you,", 62.56], ["didn't", 63.4], ["know", 63.9], ["where", 64.16], ["I", 64.34], ["would", 64.52], ["go", 64.86]] },
+    { t: 66.39, kind: "pre", words: [["Found", 66.54], ["a", 67.04], ["thing", 67.2], ["I", 67.42], ["loved", 67.58], ["to", 67.82], ["do,", 68.12], ["and", 68.46], ["I", 68.72], ["built", 69.2], ["it,", 69.92], ["row", 70.42], ["by", 71.12], ["row", 72.58]] },
+    { t: 73.73, kind: "chorus", words: [["Carry", 73.88], ["it", 74.38], ["home,", 74.8], ["carry", 76.82], ["it", 77.32], ["home", 77.64]] },
+    { t: 79.63, kind: "chorus", words: [["Every", 79.78], ["photo,", 80.48], ["every", 81.52], ["story,", 82.04], ["every", 82.92], ["voice", 83.34], ["we've", 83.94], ["ever", 84.44], ["known", 84.78]] },
+    { t: 86.03, kind: "chorus", words: [["Keep", 86.18], ["it", 86.68], ["safe", 86.92], ["forever,", 87.76], ["pass", 89.12], ["it", 89.62], ["down", 89.96], ["the", 90.42], ["line", 90.74]] },
+    { t: 91.91, kind: "chorus", words: [["Code", 92.06], ["can", 92.56], ["carry", 92.92], ["love", 93.44], ["a", 93.94], ["long,", 94.36], ["long", 94.96], ["time", 95.04]] },
+    { t: 95.54, kind: "title", words: [] }
+  ]
+  }, {
+    id: "mashup", title: "Going Live x Carry It Home", button: "Mashup", src: "going-live-mashup.mp3", bpm: 124, duration: 165.84,
+    stageLabel: "Lyric video: Going Live and Carry It Home mashup",
+    startLabel: "Play the mashup", startNote: "Under three minutes. Turn your sound up.", startAria: "Play the mashup, just under three minutes",
+    card: "GOING LIVE × CARRY IT HOME", cardLine: "Software engineering. Your turn.",
+    caption: 'The mashup trades lines between "Going Live" and "Carry It Home" as a duet. Words by Dave, music made with Suno.',
+    palette: { stage: "#1A0B1E", gold: "#FFB547", hot: "#FF3D8A", accent: "#FF8A5C", ink: "#FFF4EE", soft: "#FFE3D6", rain: "#D59AC0" },
+    cues: [
+    { t: 1.29, kind: "verse", words: [["Blank", 1.44], ["screen,", 1.74], ["blinking", 2.04], ["line,", 2.34], ["the", 2.64], ["whole", 3.44], ["world", 3.94], ["in", 4.4], ["my", 4.56], ["hands", 4.8]] },
+    { t: 5.15, kind: "verse", words: [["Every", 5.3], ["bug's", 5.8], ["a", 6.3], ["door,", 6.66], ["every", 7.02], ["fix", 7.52], ["a", 7.92], ["plan", 8.3]] },
+    { t: 8.59, kind: "verse", words: [["Think", 8.74], ["it,", 9.24], ["type", 9.45], ["it,", 9.65], ["break", 9.86], ["it,", 10.18], ["build", 10.38], ["it", 10.62], ["back", 10.86], ["tonight", 11.86]] },
+    { t: 12.85, kind: "countdown", words: [["Three,", 13.0], ["two,", 13.86], ["one,", 14.62], ["hit", 15.26], ["run", 15.86]] },
+    { t: 31.79, kind: "verse", words: [["Grandma's", 31.94], ["voice", 32.44], ["on", 32.94], ["an", 33.42], ["old", 33.78], ["cassette,", 33.98], ["fading", 35.22], ["like", 35.72], ["the", 36.08], ["evening", 36.32], ["light", 37.02]] },
+    { t: 38.73, kind: "verse", words: [["Pictures", 38.88], ["in", 39.38], ["a", 39.84], ["shoebox,", 40.02], ["curling", 40.8], ["at", 41.3], ["the", 41.62], ["corners,", 41.76], ["stories", 42.36], ["slipping", 43.06], ["out", 43.6], ["of", 44.1], ["sight", 44.44]] },
+    { t: 45.35, kind: "verse", words: [["So", 45.5], ["I", 46.0], ["sat", 46.3], ["down", 46.7], ["at", 47.36], ["the", 47.86], ["keyboard", 48.1], ["and", 49.2], ["I", 49.7], ["wrote", 49.92], ["a", 50.36], ["little", 50.88], ["code", 51.66]] },
+    { t: 52.69, kind: "verse", words: [["Now", 52.84], ["her", 53.34], ["laugh", 53.6], ["will", 54.12], ["play", 54.62], ["forever,", 55.4], ["anywhere", 57.3], ["her", 57.8], ["grandkids", 58.38], ["go", 58.88]] },
+    { t: 62.63, kind: "pre", words: [["Nobody", 62.78], ["sees", 63.28], ["the", 63.62], ["hours,", 63.84], ["they", 64.42], ["only", 64.78], ["see", 65.12], ["the", 65.46], ["light", 65.7]] },
+    { t: 66.01, kind: "pre", words: [["But", 66.16], ["I", 66.66], ["know", 66.88], ["what", 67.02], ["I", 67.36], ["made,", 67.48], ["and", 67.94], ["I", 68.28], ["made", 68.7], ["it", 69.46], ["right", 70.0]] },
+    { t: 70.77, kind: "chorus", words: [["Watch", 70.92], ["it", 71.42], ["come", 71.64], ["alive,", 72.04], ["alive", 73.8]] },
+    { t: 74.49, kind: "chorus", words: [["Something", 74.64], ["out", 75.14], ["of", 75.58], ["nothing", 75.72], ["and", 76.04], ["I", 76.46], ["built", 76.66], ["it", 76.86], ["with", 77.1], ["my", 77.3], ["mind", 77.52]] },
+    { t: 77.85, kind: "chorus", words: [["Ship", 78.0], ["it", 78.48], ["to", 78.88], ["the", 79.2], ["sky,", 79.4], ["tonight", 80.7]] },
+    { t: 81.81, kind: "chorus", words: [["Every", 81.96], ["line", 82.4], ["I", 82.84], ["write", 83.05], ["can", 83.25], ["light", 83.46], ["up", 83.85], ["someone's", 84.24], ["life", 84.84]] },
+    { t: 85.59, kind: "run", words: [["We're", 85.74], ["gonna", 86.24], ["run", 86.5], ["it,", 86.84], ["run", 87.14], ["it,", 87.26], ["run", 87.6], ["it,", 87.72], ["we're", 87.9], ["going", 88.08], ["live", 88.68]] },
+    { t: 89.31, kind: "chorus", words: [["Carry", 89.46], ["it", 89.94], ["home,", 90.4], ["carry", 92.7], ["it", 93.26], ["home", 93.76]] },
+    { t: 96.39, kind: "chorus", words: [["Every", 96.54], ["photo,", 97.38], ["every", 98.36], ["story,", 99.18], ["every", 100.16], ["voice", 100.92], ["we've", 101.76], ["ever", 102.26], ["known", 102.72]] },
+    { t: 104.41, kind: "chorus", words: [["Keep", 104.56], ["it", 105.04], ["safe", 105.34], ["forever,", 106.52], ["pass", 108.24], ["it", 108.74], ["down", 109.18], ["the", 109.68], ["line", 110.24]] },
+    { t: 111.79, kind: "chorus", words: [["Code", 111.94], ["can", 112.44], ["carry", 112.86], ["love", 113.66], ["a", 114.16], ["long,", 114.62], ["long", 115.36], ["time", 115.76]] },
+    { t: 131.81, kind: "chorus", words: [["Watch", 131.96], ["it", 132.84], ["come", 133.34], ["alive,", 133.8], ["alive", 135.46]] },
+    { t: 136.15, kind: "chorus", words: [["Something", 136.3], ["out", 136.8], ["of", 137.22], ["nothing", 137.36], ["and", 137.64], ["I", 138.1], ["built", 138.24], ["it", 138.48], ["with", 138.7], ["my", 138.92], ["mind", 139.16]] },
+    { t: 139.53, kind: "chorus", words: [["Ship", 139.68], ["it", 140.2], ["to", 140.52], ["the", 140.76], ["sky,", 140.96], ["tonight", 142.24]] },
+    { t: 143.39, kind: "chorus", words: [["Every", 143.54], ["line", 143.98], ["I", 144.42], ["write", 144.63], ["can", 144.83], ["light", 145.04], ["up", 145.35], ["someone's", 145.66], ["life", 146.26]] },
+    { t: 147.15, kind: "run", words: [["We're", 147.3], ["gonna", 147.8], ["run", 148.0], ["it,", 148.36], ["run", 148.66], ["it,", 148.78], ["run", 149.04], ["it,", 149.24], ["we're", 149.42], ["going", 149.6], ["live", 149.9]] },
+    { t: 150.4, kind: "title", words: [] }
+  ]
+  }];
+  var song = SONGS[0];
 
   var stage = document.getElementById("stage");
   var lyric = document.getElementById("lyric");
@@ -467,8 +546,12 @@ if (age = 18) {
   var pauseIcon = document.getElementById("pause-icon");
   var hint = document.getElementById("hint");
   var PAUSE_PATH = "M6 5h4v14H6zm8 0h4v14h-4z", PLAY_PATH = "M7 4.5v15l13-7.5z";
+  var songsEl = document.getElementById("songs");
+  var captionEl = document.getElementById("song-caption");
+  var startLabel = document.getElementById("start-label");
+  var startNote = document.getElementById("start-note");
   var audio = null, ctx = null, startedAt = 0, raf = 0, cueIndex = -1, running = false, paused = false;
-  var analyser = null, bins = null, beatSmooth = 0;
+  var analyser = null, bins = null, beatSmooth = 0, srcNode = null, beatMaster = null;
 
   function now() {
     if (audio) return audio.currentTime;
@@ -481,9 +564,9 @@ if (age = 18) {
     try {
       ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
       if (ctx.state === "suspended") ctx.resume();
-      var src = ctx.createMediaElementSource(audio);
+      srcNode = ctx.createMediaElementSource(audio);
       analyser = ctx.createAnalyser(); analyser.fftSize = 256; analyser.smoothingTimeConstant = 0.5;
-      src.connect(analyser); analyser.connect(ctx.destination);
+      srcNode.connect(analyser); analyser.connect(ctx.destination);
       bins = new Uint8Array(analyser.frequencyBinCount);
     } catch (e) { analyser = null; }
   }
@@ -495,7 +578,7 @@ if (age = 18) {
       beatSmooth = level > beatSmooth ? level : beatSmooth * 0.85;
       return Math.min(1, beatSmooth);
     }
-    var phase = (t * BPM / 60) % 1;
+    var phase = (t * song.bpm / 60) % 1;
     return Math.max(0, 1 - phase * 2.5);
   }
 
@@ -504,10 +587,16 @@ if (age = 18) {
   var g2 = fx.getContext("2d");
   var W = 0, H = 0, DPR = 1;
   var GLYPHS = "{}();=<>/*+-_01[]&|!#$".split("");
-  var PCOLORS = ["#FFC24B", "#FF3D8A", "#FFF3C4", "#5FE6FF"];
+  var PAL = {}, PCOLORS = [];
   var columns = [], particles = [], flashes = [], rings = [];
-  var scene = "idle", lastT = 0, deployDone = false, idleTimer = 0;
+  var scene = "idle", lastT = 0, deployDone = false, idleTimer = 0, idling = false;
   var wordSpans = [], wordIndex = 0;
+
+  function readPalette() {
+    var css = getComputedStyle(stage);
+    ["gold", "hot", "accent", "ink", "soft", "rain"].forEach(function (k) { PAL[k] = css.getPropertyValue("--stage-" + k).trim(); });
+    PCOLORS = [PAL.gold, PAL.hot, PAL.soft, PAL.accent];
+  }
 
   function sizeFx() {
     DPR = Math.min(2, window.devicePixelRatio || 1);
@@ -529,10 +618,12 @@ if (age = 18) {
       for (var k = 0; k < c.len; k++) {
         var y = c.y - k * 16; if (y < -16 || y > H + 16) continue;
         var a = alpha * (1 - k / c.len);
-        g2.fillStyle = k === 0 ? "rgba(255,249,236," + (a * 0.9).toFixed(3) + ")" : "rgba(160,150,230," + (a * 0.55).toFixed(3) + ")";
+        g2.fillStyle = k === 0 ? PAL.ink : PAL.rain;
+        g2.globalAlpha = k === 0 ? a * 0.9 : a * 0.55;
         g2.fillText(glyphAt(c.seed + k * 7 + row), c.x, y);
       }
     }
+    g2.globalAlpha = 1;
   }
   function burst(x, y, n, spread, power) {
     for (var i = 0; i < n; i++) {
@@ -542,7 +633,7 @@ if (age = 18) {
     if (particles.length > 520) particles.splice(0, particles.length - 520);
   }
   function ember() {
-    particles.push({ x: Math.random() * W, y: H + 6, vx: (Math.random() - 0.5) * 16, vy: -(30 + Math.random() * 50), g: 0, life: 1, decay: 0.22 + Math.random() * 0.25, r: 1 + Math.random() * 1.6, c: Math.random() < 0.7 ? "#FFC24B" : "#FF3D8A", shape: 0 });
+    particles.push({ x: Math.random() * W, y: H + 6, vx: (Math.random() - 0.5) * 16, vy: -(30 + Math.random() * 50), g: 0, life: 1, decay: 0.22 + Math.random() * 0.25, r: 1 + Math.random() * 1.6, c: Math.random() < 0.7 ? PAL.gold : PAL.hot, shape: 0 });
   }
   function drawParticles(dt) {
     for (var i = particles.length - 1; i >= 0; i--) {
@@ -561,7 +652,7 @@ if (age = 18) {
   function drawFlashes(t) {
     for (var i = flashes.length - 1; i >= 0; i--) {
       var f = flashes[i]; var k = (t - f.t0) / 0.9; if (k >= 1 || k < 0) { flashes.splice(i, 1); continue; }
-      g2.globalAlpha = (1 - k) * 0.5; g2.fillStyle = "#FFC24B";
+      g2.globalAlpha = (1 - k) * 0.5; g2.fillStyle = PAL.gold;
       g2.font = "900 " + Math.round(Math.min(W, H) * 0.7 * (1 + k * 0.5)) + "px Unbounded, Manrope, sans-serif";
       g2.textAlign = "center"; g2.textBaseline = "middle";
       g2.fillText(f.text, W / 2, H * 0.44);
@@ -582,13 +673,15 @@ if (age = 18) {
     g2.arcTo(x, y + h, x, y, r); g2.arcTo(x, y, x + w, y, r); g2.closePath();
   }
   function drawDeploy(t) {
-    var k = Math.min(1, Math.max(0, (t - 66.4) / 1.5));
+    var titleAt = song.cues[song.cues.length - 1].t;
+    var k = Math.min(1, Math.max(0, (t - titleAt) / 1.5));
     var bw = Math.min(W * 0.7, 420), bh = 10, x = (W - bw) / 2, y = H * 0.7;
-    g2.fillStyle = "rgba(255,249,236,.18)"; roundRect(x, y, bw, bh, 5); g2.fill();
-    if (k > 0) { g2.fillStyle = k < 1 ? "#FFC24B" : "#5FE6FF"; roundRect(x, y, Math.max(bh, bw * k), bh, 5); g2.fill(); }
-    g2.fillStyle = "rgba(255,249,236,.85)"; g2.font = "600 13px Manrope, sans-serif"; g2.textAlign = "center"; g2.textBaseline = "alphabetic";
+    g2.fillStyle = PAL.ink; g2.globalAlpha = 0.18; roundRect(x, y, bw, bh, 5); g2.fill(); g2.globalAlpha = 1;
+    if (k > 0) { g2.fillStyle = k < 1 ? PAL.gold : PAL.accent; roundRect(x, y, Math.max(bh, bw * k), bh, 5); g2.fill(); }
+    g2.fillStyle = PAL.ink; g2.globalAlpha = 0.85; g2.font = "600 13px Manrope, sans-serif"; g2.textAlign = "center"; g2.textBaseline = "alphabetic";
     g2.fillText(k < 1 ? "deploying " + Math.round(k * 100) + "%" : "deployed. 100%", W / 2, y + 30);
-    if (k >= 1 && !deployDone) { deployDone = true; burst(W / 2, H * 0.45, 170, 1.3, 260); ring("#5FE6FF", t); }
+    g2.globalAlpha = 1;
+    if (k >= 1 && !deployDone) { deployDone = true; burst(W / 2, H * 0.45, 170, 1.3, 260); ring(PAL.accent, t); }
   }
   function renderFx(t, beat) {
     if (reduced) return;
@@ -609,26 +702,28 @@ if (age = 18) {
       if (clean === "three") flash("3", t);
       else if (clean === "two") flash("2", t);
       else if (clean === "one") flash("1", t);
-      else if (clean === "run") { ring("#FFC24B", t); burst(W / 2, H / 2, 120, 1.3, 240); }
+      else if (clean === "run") { ring(PAL.gold, t); burst(W / 2, H / 2, 120, 1.3, 240); }
     } else if (c.kind === "run") {
-      if (clean === "run") ring("#FF3D8A", t);
-      if (clean === "live") { burst(W / 2, H * 0.5, 140, 1.4, 260); ring("#5FE6FF", t); }
+      if (clean === "run") ring(PAL.hot, t);
+      if (clean === "live") { burst(W / 2, H * 0.5, 140, 1.4, 260); ring(PAL.accent, t); }
     } else if (c.kind === "chorus") {
       if (i === 0) burst(W / 2, H * 0.5, 90, 1.2, 220);
       else if (Math.random() < 0.6) burst(W * (0.2 + Math.random() * 0.6), H * (0.25 + Math.random() * 0.5), 10, 1, 90);
-    } else if (c.kind === "pre" && i === 0) { ring("rgba(160,150,230,1)", t); }
+    } else if (c.kind === "pre" && i === 0) { ring(PAL.rain, t); }
   }
   function idle() {
-    if (running) return;
+    if (running) { idling = false; return; }
+    idling = true;
     renderFx(performance.now() / 1000, 0);
     idleTimer = setTimeout(function () { requestAnimationFrame(idle); }, 40);
   }
+  function startIdle() { if (!reduced && !idling) idle(); }
 
   function beatTrack(context) {
-    // Kick on every beat, hat on the off-beats, a rising pad through the chorus. Placeholder until the real song arrives.
-    var spb = 60 / BPM;
+    // Kick on every beat, hat on the off-beats, a rising pad through the chorus. Only heard when the song can't load.
+    var DURATION = song.duration, spb = 60 / song.bpm;
     var beats = Math.ceil(DURATION / spb);
-    var master = context.createGain(); master.gain.value = 0.6; master.connect(context.destination);
+    var master = beatMaster = context.createGain(); master.gain.value = 0.6; master.connect(context.destination);
     for (var b = 0; b < beats; b++) {
       var t0 = startedAt + b * spb;
       var osc = context.createOscillator(); var g = context.createGain();
@@ -654,9 +749,10 @@ if (age = 18) {
     scene = c.kind;
     stage.classList.toggle("chorus", c.kind === "chorus" || c.kind === "run");
     if (c.kind === "title") {
-      lyric.appendChild(document.createTextNode("GOING LIVE"));
-      var s = document.createElement("small"); s.textContent = "Software engineering. Your turn."; lyric.appendChild(s);
+      lyric.appendChild(document.createTextNode(song.card));
+      var s = document.createElement("small"); s.textContent = song.cardLine; lyric.appendChild(s);
       lyric.classList.add("title", "in");
+      if (song.card.length > 16) lyric.classList.add("long");
       stage.classList.add("live");
       deployDone = false;
       return;
@@ -672,7 +768,7 @@ if (age = 18) {
   }
 
   function frame() {
-    var t = now();
+    var t = now(), CUES = song.cues;
     var next = cueIndex + 1;
     while (next < CUES.length && CUES[next].t <= t) { cueIndex = next; showCue(CUES[cueIndex]); next++; }
     var c = CUES[cueIndex];
@@ -686,8 +782,8 @@ if (age = 18) {
     var beat = reduced ? 0 : beatLevel(t);
     if (!reduced) stage.style.setProperty("--beat", String(beat));
     renderFx(t, beat);
-    progress.style.width = Math.min(100, t / DURATION * 100) + "%";
-    if (t >= DURATION) { finish(); return; }
+    progress.style.width = Math.min(100, t / song.duration * 100) + "%";
+    if (t >= song.duration) { finish(); return; }
     raf = requestAnimationFrame(frame);
   }
 
@@ -696,12 +792,13 @@ if (age = 18) {
     cancelAnimationFrame(raf);
     if (audio) { audio.pause(); }
     // If the tab was throttled and frames fell behind the song, still land on the title card.
+    var CUES = song.cues;
     if (cueIndex < CUES.length - 1) { cueIndex = CUES.length - 1; showCue(CUES[cueIndex]); }
     replay.hidden = false;
     pauseBtn.hidden = true; hint.hidden = true;
     stage.classList.remove("chorus", "paused");
     scene = "idle"; lastT = performance.now() / 1000;
-    if (!reduced) idle();
+    startIdle();
   }
 
   function setPausedUI(isPaused) {
@@ -737,27 +834,83 @@ if (age = 18) {
     lyric.className = "lyric"; lyric.innerHTML = "";
     clearTimeout(idleTimer);
     particles = []; flashes = []; rings = []; scene = "verse"; lastT = 0;
-    if (AUDIO_SRC) {
-      if (!audio) {
-        audio = new Audio(AUDIO_SRC); audio.preload = "auto"; audio.crossOrigin = "anonymous";
-        audio.onended = finish;
-        audio.onerror = fallbackToBeat;
-        audio.oncanplay = function () { if (!analyser) attachAnalyser(); };
-      }
-      audio.currentTime = 0;
-      audio.play().catch(fallbackToBeat);
-    } else {
-      playBeat();
+    dropBeat();
+    // Only the chosen song's mp3 is fetched, and only once it is played.
+    if (!audio) {
+      var a = audio = new Audio(song.src); a.preload = "auto"; a.crossOrigin = "anonymous";
+      a.onended = finish;
+      a.onerror = function () { if (a === audio) fallbackToBeat(); };
+      a.oncanplay = function () { if (a === audio && !analyser) attachAnalyser(); };
     }
+    var playing = audio;
+    audio.currentTime = 0;
+    audio.play().catch(function () { if (playing === audio) fallbackToBeat(); });
     raf = requestAnimationFrame(frame);
   }
 
   function fallbackToBeat() {
     if (!running || audio === null) return;
-    audio = null; analyser = null;
+    dropAudio();
     audioNote.textContent = "The song didn't load on this device, so this is the lyric timing over a placeholder beat.";
     playBeat();
   }
+
+  function dropAudio() {
+    if (audio) {
+      audio.onended = audio.onerror = audio.oncanplay = null;
+      audio.pause(); audio.removeAttribute("src"); audio.load(); // stops any download still in flight
+    }
+    if (srcNode) { srcNode.disconnect(); srcNode = null; }
+    audio = null; analyser = null;
+  }
+  function dropBeat() {
+    if (beatMaster) { beatMaster.disconnect(); beatMaster = null; }
+  }
+
+  // Switching songs stops whatever is playing and returns to the start screen, dressed for the new song.
+  function selectSong(next) {
+    if (next === song) return;
+    running = false; paused = false;
+    cancelAnimationFrame(raf);
+    dropAudio(); dropBeat();
+    if (ctx && ctx.state === "suspended") ctx.resume();
+    song = next; cueIndex = -1;
+    stage.classList.remove("playing", "chorus", "live", "paused");
+    lyric.className = "lyric"; lyric.innerHTML = "";
+    replay.hidden = true; pauseBtn.hidden = true; hint.hidden = true;
+    progress.style.width = "0";
+    audioNote.textContent = "";
+    particles = []; flashes = []; rings = [];
+    scene = "idle"; lastT = performance.now() / 1000;
+    applySong();
+    startIdle();
+  }
+
+  function applySong() {
+    Object.keys(song.palette).forEach(function (k) { stage.style.setProperty(k === "stage" ? "--stage" : "--stage-" + k, song.palette[k]); });
+    readPalette();
+    stage.setAttribute("aria-label", song.stageLabel);
+    start.setAttribute("aria-label", song.startAria);
+    startLabel.textContent = song.startLabel;
+    startNote.textContent = song.startNote;
+    captionEl.textContent = song.caption;
+    songsEl.querySelectorAll(".song").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.song === song.id)); });
+  }
+
+  function clock(seconds) {
+    var s = Math.round(seconds);
+    return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+  }
+  SONGS.forEach(function (sg) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "song"; b.dataset.song = sg.id;
+    var name = document.createElement("b"); name.textContent = sg.button;
+    var len = document.createElement("span"); len.textContent = clock(sg.duration);
+    b.append(name, len);
+    b.addEventListener("click", function () { selectSong(sg); });
+    songsEl.appendChild(b);
+  });
+  applySong();
 
   function playBeat() {
     try {
@@ -786,7 +939,7 @@ if (age = 18) {
   });
   window.addEventListener("resize", sizeFx);
   sizeFx();
-  if (reduced) { fx.hidden = true; } else { idle(); }
+  if (reduced) { fx.hidden = true; } else { startIdle(); }
 
   // ---------- Live editor ----------
   var code = document.getElementById("code");

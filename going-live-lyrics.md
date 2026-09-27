@@ -138,11 +138,17 @@ At this tempo the song may run closer to 1:30. To trim, delete the bridge and re
 
 ## 4. "Going Live x Carry It Home (Mashup)" (2:46, `going-live-mashup.mp3`)
 
-A duet: singer A carries the Going Live lines, singer B the Carry It Home lines. The lyrics below are the ones Suno produced. Each `[transition]` is instrumental.
+A duet: singer A carries the Going Live lines, singer B the Carry It Home lines. The lyrics below are the ones Suno produced. Each `[transition]` is instrumental. Suno also sang the Going Live verse over the opening, before the first transition; it is listed first because it is on the track.
 
 ### Lyrics
 
 ```
+[singer A]
+Blank screen, blinking line, the whole world in my hands
+Every bug's a door, every fix a plan
+Think it, type it, break it, build it back tonight
+Three, two, one, hit run
+
 [transition]
 
 [singer B]
